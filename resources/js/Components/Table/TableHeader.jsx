@@ -62,7 +62,7 @@ const TableHeader = ({
   return (
 		<th
 			onClick={sortable ? (() => handleSort(name)) : undefined}
-			className={`${theme === 'bg-skin-black' ? theme+' text-gray-400' : 'bg-custom-gray text-customTextGray'} border border-secondary border-t-0 first:border-l-0 last:border-r-0  font-poppins text-[13px]  ${widthClass} ${stickyClass}`}>
+			className={`${theme === 'bg-skin-black' ? theme+' text-gray-400' : 'bg-custom-gray text-gray-500'} border border-secondary border-t-0 first:border-l-0 last:border-r-0  font-poppins text-[13px]  ${widthClass} ${stickyClass}`}>
 			<div className={`px-5 py-3.5 flex items-center gap-3  left- ${sortable && "cursor-pointer"} ${justifyClass}`}>
 				{children}
 				{sortable && (

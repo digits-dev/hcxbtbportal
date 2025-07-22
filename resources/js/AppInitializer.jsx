@@ -23,11 +23,11 @@ const AppInitializer = () => {
                             <div class="nprogress-circle-loader-wrapper" id="nprogress">
                                 <div class="relative  w-16 h-16 md:w-32 md:h-32">
                                     <div 
-                                        class="absolute inset-0 border-4 md:border-8 border-cyan-400 border-t-transparent rounded-full animate-spin"
+                                        class="absolute inset-0 border-4 md:border-8 border-gray-200 border-t-transparent rounded-full animate-spin"
                                     >
                                     </div>
                                     <div class="absolute inset-0 flex items-center justify-center">
-                                        <img src="/images/others/digits-icon.png" class="w-6 h-6 md:w-14 md:h-14 object-cover"/>
+                                        <img src="/images/login-page/btb-logo.png" class="w-6 h-6 md:w-14 md:h-14 object-cover"/>
                                     </div>
                                 </div>
                                 <div class="bar" role="bar" style="display: none;"></div>

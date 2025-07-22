@@ -6,11 +6,11 @@ const LoginInput = ({title, value, name, type, placeholder, onError, onChange, a
   return (
     <div className={`w-full font-poppins text-sm z-20 md:text-base ${addMainClass} relative`}>
         {title && 
-          <p className={`md:mb-1 ${addTitleClass} text-white `}>{title}</p>
+          <p className={`md:mb-1 ${addTitleClass} text-black `}>{title}</p>
         }
         <div className={`relative border ${onError ? 'border-red-600' : 'border-accent'} overflow-hidden rounded-md md:rounded-lg md:border-2`}>
           <input 
-              className={`px-2 py-1 w-full outline-none placeholder:text-gray-400 md:px-3 md:py-2 ${addInputClass}`} 
+              className={`px-2 py-1 w-full placeholder:text-gray-400 md:px-3 md:py-2 ${addInputClass} focus:ring-gray-900 focus:outline-none focus:border-gray-900`} 
               placeholder={placeholder}
               name={name}
               value={value}

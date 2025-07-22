@@ -1,9 +1,9 @@
 import React from 'react'
 
-const CheckboxWithText = ({key, id="custom-checkbox", text= "Show Password", type="checkbox", name="exampleCheckbox", color = "login", handleClick, isChecked, disabled, addMainClass, textColor = "text-white" }) => {
+const CheckboxWithText = ({key, id="custom-checkbox", text= "Show Password", type="checkbox", name="exampleCheckbox", color = "login", handleClick, isChecked, disabled, addMainClass, textColor = "text-black" }) => {
 
     const colorStyle = {
-        login : 'checked:border-login-btn-color checked:bg-login-btn-color checked:before:bg-login-btn-color',
+        login : 'checked:border-gray-900 checked:bg-gray-900 checked:before:bg-gray-900',
         blue: 'checked:border-blue-500 checked:bg-blue-500 checked:before:bg-blue-500'
     }[color];
 

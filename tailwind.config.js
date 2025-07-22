@@ -24,8 +24,8 @@ module.exports = {
                 customTextGray: "#3c8dbc",
                 "custom-gray": "#F5F5F5",
                 "sidebar-hover-color": "#323232",
-                "skin-blue-secondary": "#1e3a8a",
-                "skin-blue-accent": "#425aa1",
+                "skin-blue-secondary": "#070d1c",
+                "skin-blue-accent": "#3b3d45",
                 "skin-blue-light": "#508C9B",
                 "skin-black": "#101215",
                 "skin-black-secondary": "#2c3138",
@@ -36,7 +36,7 @@ module.exports = {
                 
             },
             backgroundImage: {
-                "skin-blue": "linear-gradient(to bottom right, #1e3a8a, #172554)",
+                "skin-blue": "linear-gradient(to bottom right, #111827, #1F2937, #000000)",
                 'password-gradient': 'linear-gradient(90deg, #FFD54F 0%, #FF8C00 100%)',
                 'profile-gradient': 'linear-gradient(90deg, #4A90E2 0%, #6A5ACD 100%)',
                 'logout-gradient': 'linear-gradient(90deg, #FF4B4B 0%, #FF6EC7 100%)',

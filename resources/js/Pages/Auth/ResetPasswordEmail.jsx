@@ -170,79 +170,93 @@ const ResetPasswordEmail = ({ email }) => {
     return (
         <>
             <Head title='Reset Password'/>
-            <div className="flex flex-col items-center p-5 justify-center w-screen h-screen font-poppins " >
-                <img className='w-full h-full absolute' src='/images/login-page/login-bg.jpg'/>
-                <img className='w-12 h-12 md:w-16 md:h-16 mb-3 z-50' src='/images/others/digits-icon.png'/>
-                <p className='text-white text-md md:text-xl font-semibold z-50'>Digits Item Masterfile System</p>
-                <form onSubmit={handleSubmit} className="flex flex-col m-5 items-center z-50 bg-white/20 w-full border border-white/40 rounded-xl shadow-lg p-6 max-w-md">
-                    <p className='text-white text-xl md:text-2xl font-semibold my-4'>Reset Password</p>
-                    <p className="text-red-300 text-xs md:text-sm w-full">
-                        *Please fill all the fields
-                    </p>
-                    <LoginInput
-                        addMainClass="mt-2"
-                        placeholder="Enter New Password"
-                        title="New Password"
-                        name="new_password"
-                        value={data.new_password}
-                        type={isChecked ? 'text' : 'password'}
-                        onError={errors.new_password}
-                        onChange={handlePasswordChange}
-                    />
-                    {data.new_password && (
-                        <div className="mt-3 w-full">
-                            <div className="relative w-full h-3 bg-gray-200 rounded">
-                                <div
-                                    className={`absolute top-0 left-0 h-full rounded transition-all ${passwordStrength < 40 ? 'bg-red-500': passwordStrength < 70 ? 'bg-yellow-400': 'bg-green-500'}`}
-                                    style={{
-                                        width: `${passwordStrength}%`
-                                    }}
-                                ></div>
-                            </div>
-                            <div className="text-xs mt-1 text-white">
-                                {passwordStrength < 40
-                                    ? 'Weak Password'
-                                    : passwordStrength < 70
-                                    ? 'Medium Password'
-                                    : 'Strong Password'}
-                            </div>
-                            <div className="text-xs mt-1 text-gray-300">
-                                <div className={`${isUpperCase && 'text-green-500'}`}><i className={`${isUpperCase ? 'fa-solid fa-check' : 'fa-solid fa-circle-info text-xs'} mr-1`}></i><span>Atleast 1 Uppercase Letter</span></div>
-                                <div className={`${isLowerCase && 'text-green-500'}`}><i className={`${isLowerCase ? 'fa-solid fa-check' : 'fa-solid fa-circle-info text-xs'} mr-1`}></i><span>Atleast 1 Lowercase Letter</span></div>
-                                <div className={`${isCorrectLength && 'text-green-500'}`}><i className={`${isCorrectLength ? 'fa-solid fa-check' : 'fa-solid fa-circle-info text-xs'} mr-1`}></i><span>Atleast 8 Characters Long</span></div>
-                                <div className={`${isSpecialChar && 'text-green-500'}`}><i className={`${isSpecialChar ? 'fa-solid fa-check' : 'fa-solid fa-circle-info text-xs'} mr-1`}></i><span>Atleast 1 Special Character</span></div>
-                                <div className={`${isNumber && 'text-green-500'}`}><i className={`${isNumber ? 'fa-solid fa-check' : 'fa-solid fa-circle-info text-xs'} mr-1`}></i><span>Atleast 1 Number</span></div>
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black px-4 py-8">
+                {/* CARD */}
+                <div className="w-full max-w-4xl relative backdrop-blur-sm bg-white border border-gray-200/50 shadow-2xl shadow-black/20 rounded-2xl overflow-hidden">
+                    <div className="flex min-h-[600px]">
+                        <form onSubmit={handleSubmit} className="w-1/2 p-8 flex z-50 items-center justify-center flex-col m-5">
+                            <p className='text-black text-xl md:text-2xl font-semibold mb-10'>Reset Password</p>
+                            <p className="text-red-300 text-xs md:text-sm w-full">
+                                *Please fill all the fields
+                            </p>
+                            <LoginInput
+                                addMainClass="mt-2"
+                                placeholder="Enter New Password"
+                                title="New Password"
+                                name="new_password"
+                                value={data.new_password}
+                                type={isChecked ? 'text' : 'password'}
+                                onError={errors.new_password}
+                                onChange={handlePasswordChange}
+                            />
+                            {data.new_password && (
+                                <div className="mt-3 w-full">
+                                    <div className="relative w-full h-3 bg-gray-200 rounded">
+                                        <div
+                                            className={`absolute top-0 left-0 h-full rounded transition-all ${passwordStrength < 40 ? 'bg-red-500': passwordStrength < 70 ? 'bg-yellow-400': 'bg-green-500'}`}
+                                            style={{
+                                                width: `${passwordStrength}%`
+                                            }}
+                                        ></div>
+                                    </div>
+                                    <div className="text-xs mt-1 text-white">
+                                        {passwordStrength < 40
+                                            ? 'Weak Password'
+                                            : passwordStrength < 70
+                                            ? 'Medium Password'
+                                            : 'Strong Password'}
+                                    </div>
+                                    <div className="text-xs mt-1 text-gray-300">
+                                        <div className={`${isUpperCase && 'text-green-500'}`}><i className={`${isUpperCase ? 'fa-solid fa-check' : 'fa-solid fa-circle-info text-xs'} mr-1`}></i><span>Atleast 1 Uppercase Letter</span></div>
+                                        <div className={`${isLowerCase && 'text-green-500'}`}><i className={`${isLowerCase ? 'fa-solid fa-check' : 'fa-solid fa-circle-info text-xs'} mr-1`}></i><span>Atleast 1 Lowercase Letter</span></div>
+                                        <div className={`${isCorrectLength && 'text-green-500'}`}><i className={`${isCorrectLength ? 'fa-solid fa-check' : 'fa-solid fa-circle-info text-xs'} mr-1`}></i><span>Atleast 8 Characters Long</span></div>
+                                        <div className={`${isSpecialChar && 'text-green-500'}`}><i className={`${isSpecialChar ? 'fa-solid fa-check' : 'fa-solid fa-circle-info text-xs'} mr-1`}></i><span>Atleast 1 Special Character</span></div>
+                                        <div className={`${isNumber && 'text-green-500'}`}><i className={`${isNumber ? 'fa-solid fa-check' : 'fa-solid fa-circle-info text-xs'} mr-1`}></i><span>Atleast 1 Number</span></div>
+                                    </div>
+                                </div>
+                            )}
+                            <LoginInput
+                                addMainClass="mt-2"
+                                placeholder="Confirm your Password"
+                                title="Confirm Password"
+                                value={data.confirm_password}
+                                name="confirm_password"
+                                type={isChecked ? 'text' : 'password'}
+                                onError={errors.confirm_password}
+                                onChange={handleChange}
+                            />
+                            <CheckboxWithText
+                                id="custom-checkbox"         
+                                type="checkbox"             
+                                name="exampleCheckbox"      
+                                handleClick={handleCheckboxClick} 
+                                isChecked={isChecked}        
+                                disabled={false}  
+                                addMainClass="justify-end mt-2"         
+                            />
+                            <button 
+                                className={`w-full font-open-sans bg-gradient-to-br from-gray-900 via-gray-800 to-black  mt-4 text-white p-2 text-xs cursor-pointer rounded-lg text-center font-medium hover:opacity-70 md:text-base md:p-2.5 disabled:cursor-not-allowed `}
+                                type="submit"
+                                disabled={processing}
+                                >
+                                    {processing ? 'Please Wait' : 'Reset Password'}
+                            </button>
+                            <p className='text-xs md:text-sm mt-5 text-black '><span>Already know the password?</span> <Link href='/login' className='text-gray-500 font-semibold hover:opacity-70'>Back to Login</Link></p>
+                        </form>          
+                        <div className="w-1/2 bg-gradient-to-br from-gray-800 to-black text-black p-12 flex flex-col justify-center items-center text-center">
+                            <div>
+                                <div className='flex items-center space-x-4 justify-center mb-5 '>
+                                    <img className='w-auto h-12 md:w-auto md:h-14 mb-3 z-50' src='/images/login-page/home-credit-logo.png'/>
+                                    <div className='h-20 border-l-2'/>
+                                    <img className='w-12 h-12 md:w-16 md:h-16 mb-3 z-50' src='/images/login-page/btb-logo.png'/>
+                                </div>
+                                <p className="text-gray-300 mb-16 leading-relaxed">
+                                    Home Credit | BTB Portal
+                                </p>
                             </div>
                         </div>
-                    )}
-                    <LoginInput
-                        addMainClass="mt-2"
-                        placeholder="Confirm your Password"
-                        title="Confirm Password"
-                        value={data.confirm_password}
-                        name="confirm_password"
-                        type={isChecked ? 'text' : 'password'}
-                        onError={errors.confirm_password}
-                        onChange={handleChange}
-                    />
-                    <CheckboxWithText
-                        id="custom-checkbox"         
-                        type="checkbox"             
-                        name="exampleCheckbox"      
-                        handleClick={handleCheckboxClick} 
-                        isChecked={isChecked}        
-                        disabled={false}  
-                        addMainClass="justify-end mt-2"         
-                    />
-                    <button 
-                        className={`w-full font-open-sans bg-login-btn-color mt-4 text-white p-2 text-xs cursor-pointer rounded-lg text-center font-medium hover:opacity-70 md:text-base md:p-2.5 disabled:cursor-not-allowed `}
-                        type="submit"
-                        disabled={processing}
-                        >
-                            {processing ? 'Please Wait' : 'Reset Password'}
-                    </button>
-                    <p className='text-xs md:text-sm mt-5 text-white '><span>Already know the password?</span> <Link href='/login' className='text-login-btn-color2 font-semibold hover:opacity-70'>Back to Login</Link></p>
-                </form>
+                    </div>
+                </div>
             </div>
         </>
     );

@@ -141,7 +141,7 @@ const AppNavbar = () => {
                     <div className="flex gap-x-4 items-center justify-center lg:justify-start px-[20px] py-[10px] lg:py-[15px]">
                         <Link href='/dashboard'>
                             <img
-                                src="/images/others/digits-icon.png"
+                                src="/images/login-page/btb-logo.png"
                                 className="w-7 h-7 cursor-pointer duration-500"
                                 alt="App Logo"
                             />
