@@ -148,6 +148,26 @@ class AdmModulesSeeder extends Seeder
                 'is_active' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
             ],
+            [
+                'name' => 'Orders',
+                'icon' => 'fa-solid fa-check',
+                'path' => 'item_inventories',
+                'table_name' => 'item_inventories',
+                'controller' => 'ItemInventories\ItemInventoriesController',
+                'is_protected' => 0,
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+            ],
+            [
+                'name' => 'Item Master',
+                'icon' => 'fa-solid fa-box-archive',
+                'path' => 'item_masters',
+                'table_name' => 'item_masters',
+                'controller' => 'ItemMasters\ItemMastersController',
+                'is_protected' => 0,
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+            ],
 
         ];
 

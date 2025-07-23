@@ -13,7 +13,7 @@ const Filters = ({ filter_inputs }) => {
     const { primayActiveColor, textColorActive } = useThemeStyles(theme);
     const [pathname, setPathname] = useState(null);
     const initialFormData = filter_inputs.reduce((acc, item) => {
-        acc[item.name] = "";
+        acc[item.column] = "";
         return acc;
     }, {});
 
@@ -112,7 +112,7 @@ const Filters = ({ filter_inputs }) => {
                 {filter_inputs.map((input, index) => (
                     <div className="md:flex items-center justify-between md:space-x-2" key={index}>
                         <div className="flex items-center space-x-2 w-[100px] mr-5">
-                            <p className="text-xs font-semibold uppercase text-gray-700">{input.header_name}</p>
+                            <p className="text-xs font-semibold uppercase text-gray-700">{input.name}</p>
                         </div>
                         <CustomSelect
                             placeholder="Select Operator Type"
@@ -120,25 +120,25 @@ const Filters = ({ filter_inputs }) => {
                             options={operators}
                             maxMenuHeight="70px"
                             addMainClass="md:w-[150px]"
-                            onChange={(selectedValue) => handleFilter("operator", input.name, selectedValue)}
+                            onChange={(selectedValue) => handleFilter("operator", input.column, selectedValue)}
                         />
 
                         <InputComponent
                             placeholder={
-                                filters[input.name]?.operator ? 
-                                ['IN', 'NOT IN'].includes(filters[input.name]?.operator)
+                                filters[input.column]?.operator ? 
+                                ['IN', 'NOT IN'].includes(filters[input.column]?.operator)
                                     ? 'e.g: Value 1,Value 2,Value 3' :
-                                ['Empty (or Null)'].includes(filters[input.name]?.operator) ? ''
+                                ['Empty (or Null)'].includes(filters[input.column]?.operator) ? ''
                                     : 'e.g: Value'
                                 : '' 
                             }
-                            disabled={filters[input.name]?.operator ? 
-                                ['Empty (or Null)'].includes(filters[input.name]?.operator)
+                            disabled={filters[input.column]?.operator ? 
+                                ['Empty (or Null)'].includes(filters[input.column]?.operator)
                                     ? true
                                     : false
                                 : true}
                             addClass="min-w-[250px] flex-1"
-                            onChange={(selectedValue) => handleFilter("value", input.name, selectedValue)}
+                            onChange={(selectedValue) => handleFilter("value", input.column, selectedValue)}
                         />
 
                         <CustomSelect
@@ -146,7 +146,7 @@ const Filters = ({ filter_inputs }) => {
                             defaultSelect="Sort Order"
                             options={sorting}
                             addMainClass="md:w-[120px]"
-                            onChange={(selectedValue) => handleFilter("sorting", input.name, selectedValue)}
+                            onChange={(selectedValue) => handleFilter("sorting", input.column, selectedValue)}
                         />
                     </div>
                 ))}

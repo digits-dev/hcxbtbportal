@@ -31,7 +31,7 @@ const useThemeStyles = (theme) => {
        
         },
         buttonSwalColor: {
-            'bg-skin-blue': '#134B70',
+            'bg-skin-blue': '#322C2B',
             'bg-skin-black': '#322C2B',
       
         },

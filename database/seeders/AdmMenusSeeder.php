@@ -39,6 +39,30 @@ class AdmMenusSeeder extends Seeder
                 'id_adm_privileges' => 1,
                 'sorting'           => 2
             ],
+            [
+                'name'              => 'Item Inventory',
+                'type'              => 'Route',
+                'path'              => 'ItemInventories\ItemInventoriesControllerGetIndex',
+                'slug'              => 'item_inventories',
+                'icon'              => 'fa-solid fa-check',
+                'parent_id'         => 0,
+                'is_active'         => 1,
+                'is_dashboard'      => 1,
+                'id_adm_privileges' => 1,
+                'sorting'           => 3
+            ],
+            [
+                'name'              => 'Item Master',
+                'type'              => 'Route',
+                'path'              => 'ItemMasters\ItemMastersControllerGetIndex',
+                'slug'              => 'item_masters',
+                'icon'              => 'fa-solid fa-box-archive',
+                'parent_id'         => 0,
+                'is_active'         => 1,
+                'is_dashboard'      => 1,
+                'id_adm_privileges' => 1,
+                'sorting'           => 4
+            ],
         ];
 
         foreach ($menus as $menu) {

@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ContentPanel from "../../Components/Table/ContentPanel";
 import Tooltip from "../../Components/Tooltip/Tooltip";
 import Button from "../../Components/Table/Buttons/Button";
@@ -18,6 +18,7 @@ import RowStatus from "../../Components/Table/RowStatus";
 import Pagination from "../../Components/Table/Pagination";
 import RowData from "../../Components/Table/RowData";
 import RowAction from "../../Components/Table/RowAction";
+import CustomFilter from "../../Components/Table/Buttons/CustomFilter";
 import moment from "moment/moment";
 
 const Orders = ({page_title, queryParams, orders}) => {
@@ -26,6 +27,11 @@ const Orders = ({page_title, queryParams, orders}) => {
     const { theme } = useTheme();
     const { primayActiveColor, textColorActive } = useThemeStyles(theme);
     const [pathname, setPathname] = useState(null);
+
+    useEffect(() => {
+        const segments = window.location.pathname.split("/");
+        setPathname(segments.pop());
+    }, []);
 
     const refreshTable = (e) => {
         e.preventDefault();
@@ -67,7 +73,23 @@ const Orders = ({page_title, queryParams, orders}) => {
                         <Export path="/orders/export" page_title={page_title}/>
                     </div>
                     <div className="flex">
-                        {/* <Filters filter_inputs={['sameple']}/> */}
+                        <CustomFilter>
+                            <Filters filter_inputs={[
+                                {name: 'Reference Number', column: 'reference_number'},
+                                {name: 'Item Description', column: 'digits_code'},
+                                {name: 'Customer Name', column: 'item_description'},
+                                {name: 'Delivery Address', column: 'model'},
+                                {name: 'Email Address', column: 'actual_color'},
+                                {name: 'Contact Details', column: 'size_value'},
+                                {name: 'Downpayment', column: 'created_at'},
+                                {name: 'Downpayment Value', column: 'updated_at'},
+                                {name: 'Financed Amount', column: 'updated_at'},
+                                {name: 'Created By', column: 'updated_at'},
+                                {name: 'Updated By', column: 'updated_at'},
+                                {name: 'Created Date', column: 'updated_at'},
+                                {name: 'Updated Date', column: 'updated_at'},
+                            ]}/>
+                        </CustomFilter>
                         <TableSearch queryParams={queryParams} />
                     </div>
                 </TopPanel>
