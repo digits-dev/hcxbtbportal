@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\LogsController;
 use App\Http\Controllers\Admin\SystemErrorLogsController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\ItemInventories\ItemInventoriesController;
+use App\Http\Controllers\ItemMasters\ItemMastersController;
 use App\Http\Controllers\Users\ChangePasswordController;
 use App\Http\Controllers\Users\ProfilePageController;
 use Illuminate\Support\Facades\Log;
@@ -186,7 +187,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::prefix('item_masters')->group(function () {
-        Route::get('/export', [ItemInventoriesController::class, 'export']);
+        Route::get('/export', [ItemMastersController::class, 'export']);
     });
     
 });
