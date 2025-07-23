@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AdmRequestController;
 use App\Http\Controllers\Admin\LogsController;
 use App\Http\Controllers\Admin\SystemErrorLogsController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\ItemInventories\ItemInventoriesController;
 use App\Http\Controllers\Users\ChangePasswordController;
 use App\Http\Controllers\Users\ProfilePageController;
 use Illuminate\Support\Facades\Log;
@@ -179,10 +180,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/create', [OrdersController::class, 'create']);
         Route::post('/store', [OrdersController::class, 'store']);
     });
+    
+    Route::prefix('item_inventories')->group(function () {
+        Route::get('/export', [ItemInventoriesController::class, 'export']);
+    });
 
-
-
-
+    Route::prefix('item_masters')->group(function () {
+        Route::get('/export', [ItemInventoriesController::class, 'export']);
+    });
+    
 });
 
 Route::group([

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\ItemMasters;
 
+use App\Exports\SubmasterExport;
 use App\Helpers\CommonHelpers;
 use App\Http\Controllers\Controller;
 use App\Models\ItemMaster;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ItemMastersController extends Controller
 {
@@ -46,4 +48,38 @@ class ItemMastersController extends Controller
 
         return Inertia::render("ItemMasters/ItemMasters", $data);
     }
+
+    public function export()
+    {
+
+        $headers = [
+            'Id',
+            'Digits Code',
+            'Item Description',
+            'Model',
+            'Color',
+            'Size',
+            'Created Date',
+            'Updated Date',
+        ];
+
+        $columns = [
+            'id',
+            'digits_code',
+            'item_description',
+            'model',
+            'actual_color',
+            'size',
+            'created_at',
+            'updated_at',
+        ];
+
+        $filename = "Item Master - " . date ('Y-m-d H:i:s');
+        $query = self::getAllData();
+        return Excel::download(new SubmasterExport($query, $headers, $columns), $filename . '.xlsx');
+
+    }
+
+    
+
 }

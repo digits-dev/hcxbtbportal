@@ -19,6 +19,7 @@ import Pagination from "../../Components/Table/Pagination";
 import RowData from "../../Components/Table/RowData";
 import RowAction from "../../Components/Table/RowAction";
 import CustomFilter from "../../Components/Table/Buttons/CustomFilter";
+import moment from "moment/moment";
 
 const ItemMasters = ({page_title, queryParams, item_master}) => {
 
