@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('item_description', 100)->nullable();
             $table->string('model', 50)->nullable();
             $table->string('actual_color', 50)->nullable();
-            $table->string('size_value', 10)->nullable();
+            $table->string('size', 10)->nullable();
             $table->timestamps();
         });
     }

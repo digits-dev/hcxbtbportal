@@ -149,7 +149,7 @@ class AdmModulesSeeder extends Seeder
                 'created_at' => date('Y-m-d H:i:s'),
             ],
             [
-                'name' => 'Orders',
+                'name' => 'Item Inventories',
                 'icon' => 'fa-solid fa-check',
                 'path' => 'item_inventories',
                 'table_name' => 'item_inventories',

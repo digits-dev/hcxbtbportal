@@ -40,6 +40,7 @@ const Orders = ({page_title, queryParams, orders}) => {
 
     return (
         <>
+            <Head title={page_title}/>
             <ContentPanel>
                 <TopPanel>
                     <div className="inline-flex flex-wrap gap-1">

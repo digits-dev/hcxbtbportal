@@ -39,6 +39,7 @@ const ItemMasters = ({page_title, queryParams, item_master}) => {
 
     return (
         <>
+            <Head title={page_title}/>
             <ContentPanel>
                 <TopPanel>
                     <div className="inline-flex flex-wrap gap-1">
