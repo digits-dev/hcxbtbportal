@@ -5,7 +5,7 @@ import Select from 'react-select';
 import { useTheme } from "../../Context/ThemeContext";
 import LoginInputTooltip from "../Tooltip/LoginInputTooltip";
 
-const CustomSelect = ({isMulti = false, onError, maxMenuHeight = "100px", isStatus = false, menuPlacement, isDisabled,  options, onChange, value, name, defaultSelect, displayName, is_multi='', selectType = 'react-select', placeholder, extendClass, addMainClass }) => {
+const CustomSelect = ({isMulti = false, onError, maxMenuHeight = "100px", isStatus = false, menuPlacement, isDisabled,  options, onChange, value, name, defaultSelect, displayName, is_multi='', selectType = 'react-select', placeholder, extendClass, addMainClass, fontSize='12px' }) => {
     const {theme} = useTheme();
     const customStyles = {
         control: (provided) => ({
@@ -21,6 +21,7 @@ const CustomSelect = ({isMulti = false, onError, maxMenuHeight = "100px", isStat
         singleValue: (provided) => ({
             ...provided,
             color: "#9CA3AF", // Ensure selected value text is white
+              fontSize: fontSize,
         }),
         menu: (provided) => ({
             ...provided,
@@ -28,6 +29,7 @@ const CustomSelect = ({isMulti = false, onError, maxMenuHeight = "100px", isStat
             color: "#9CA3AF", // Dropdown text color
             maxHeight: maxMenuHeight,
             zIndex: 9999,
+            fontSize: fontSize,
             
         }),
         menuList: (provided) => ({
@@ -93,10 +95,15 @@ const CustomSelect = ({isMulti = false, onError, maxMenuHeight = "100px", isStat
           ...provided,
           color: isStatus ? state.data.status === "INACTIVE" ? "#EB4034" : "" : "", // Make text red for INACTIVE status
         }),
+        singleValue: (provided) => ({
+            ...provided,
+              fontSize: fontSize,
+        }),
         menu: (provided) => ({
             ...provided,
             maxHeight: maxMenuHeight,
             zIndex: 9999,
+            fontSize: fontSize,
         }),
         menuList: (provided) => ({
             ...provided,

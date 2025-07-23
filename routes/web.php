@@ -20,6 +20,11 @@ use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Users\ChangePasswordController;
 use App\Http\Controllers\Users\ProfilePageController;
 use Illuminate\Support\Facades\Log;
+
+
+use App\Http\Controllers\Orders\OrdersController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -170,6 +175,14 @@ Route::middleware(['auth'])->group(function () {
 
     });
 
+    Route::prefix('orders')->group(function () {
+        Route::get('/create', [OrdersController::class, 'create']);
+        Route::post('/store', [OrdersController::class, 'store']);
+    });
+
+
+
+
 });
 
 Route::group([
@@ -232,4 +245,3 @@ Route::group([
         }
     }
 })->middleware('auth');
-

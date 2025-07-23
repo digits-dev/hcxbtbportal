@@ -18,6 +18,7 @@ import RowStatus from "../../Components/Table/RowStatus";
 import Pagination from "../../Components/Table/Pagination";
 import RowData from "../../Components/Table/RowData";
 import RowAction from "../../Components/Table/RowAction";
+import moment from "moment/moment";
 
 const Orders = ({page_title, queryParams, orders}) => {
 
@@ -56,8 +57,9 @@ const Orders = ({page_title, queryParams, orders}) => {
                                         ? primayActiveColor
                                         : theme) + " py-[5px] px-[10px]"
                                 }
-                                type="button"
+                                  type="link"
                                 fontColor={textColorActive}
+                                href="orders/create"
                         >
                                 <i className="fa-solid fa-plus mr-1"></i> Add Order
                             </Button>
@@ -79,13 +81,13 @@ const Orders = ({page_title, queryParams, orders}) => {
                             >
                                 Action
                             </TableHeader>
-                            <TableHeader
+                            {/* <TableHeader
                                 name="status"
                                 queryParams={queryParams}
                                 width="sm"
                             >
                                 Status
-                            </TableHeader>
+                            </TableHeader> */}
                             <TableHeader
                                 name="reference_number"
                                 queryParams={queryParams}
@@ -195,7 +197,7 @@ const Orders = ({page_title, queryParams, orders}) => {
                                             action="view"
                                         />
                                     </RowData>
-                                    <RowStatus
+                                    {/* <RowStatus
                                         systemStatus={
                                             item.status === "1"
                                                 ? "active"
@@ -205,7 +207,7 @@ const Orders = ({page_title, queryParams, orders}) => {
                                         {item.status === "1"
                                             ? "ACTIVE"
                                             : "INACTIVE"}
-                                    </RowStatus>
+                                    </RowStatus> */}
                                     <RowData>
                                         {item.reference_number ?? '-'}
                                     </RowData>
@@ -225,7 +227,7 @@ const Orders = ({page_title, queryParams, orders}) => {
                                         {item.contact_details ?? '-'}
                                     </RowData>
                                     <RowData>
-                                        {item.is_downpayment}
+                                        {item.has_downpayment}
                                     </RowData>
                                     <RowData>
                                         {item.downpayment_value ?? '-'}

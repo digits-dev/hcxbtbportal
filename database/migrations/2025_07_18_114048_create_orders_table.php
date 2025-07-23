@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('delivery_address', 255)->nullable();
             $table->string('email_address', 255)->nullable();
             $table->string('contact_details', 255)->nullable();
-            $table->string('is_downpayment', 10)->nullable();
+            $table->string('has_downpayment', 10)->nullable();
             $table->decimal('downpayment_value', 18, 2)->nullable();
             $table->decimal('financed_amount', 18, 2)->nullable();
             $table->integer('item_id')->nullable();

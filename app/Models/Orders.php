@@ -4,10 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Helpers\CommonHelpers;
 
 class Orders extends Model
 {
     use HasFactory;
+
+      protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->created_by = CommonHelpers::myId();
+        });
+
+        static::updating(function ($model) {
+            $model->updated_by = CommonHelpers::myId();
+        });
+    }
+
 
     protected $fillable = [
         'id',
@@ -17,7 +32,7 @@ class Orders extends Model
         'delivery_address',
         'email_address',
         'contact_details',
-        'is_downpayment',
+        'has_downpayment',
         'downpayment_value',
         'financed_amount',
         'item_id',
@@ -35,7 +50,7 @@ class Orders extends Model
         'delivery_address',
         'email_address',
         'contact_details',
-        'is_downpayment',
+        'has_downpayment',
         'downpayment_value',
         'financed_amount',
         'item_id',
@@ -98,4 +113,12 @@ class Orders extends Model
     public function getUpdatedBy() {
         return $this->belongsTo(AdmUser::class, 'updated_by', 'id');
     }
+
+      public static function generateReferenceNumber()
+    {
+        $maxId = self::max('id'); 
+        $nextId = $maxId + 1; 
+        return 'HC' . str_pad($nextId, 6, '0', STR_PAD_LEFT);
+    }
+    
 }
