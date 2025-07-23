@@ -140,6 +140,9 @@ const ItemMasters = ({page_title, queryParams, item_master}) => {
                             item_master?.data.map((item, index) => (
                                 <Row key={item.id}>
                                     <RowData>
+                                        {item.id ?? '-'}
+                                    </RowData>
+                                    <RowData>
                                         {item.digits_code ?? '-'}
                                     </RowData>
                                     <RowData>
@@ -152,7 +155,7 @@ const ItemMasters = ({page_title, queryParams, item_master}) => {
                                         {item.actual_color ?? '-'}
                                     </RowData>
                                     <RowData>
-                                        {item.size_value ?? '-'}
+                                        {item.size ?? '-'}
                                     </RowData>
                                     <RowData>
                                         {item.created_at ? (moment(item.created_at).format("YYYY-MM-DD HH:mm:ss")) : '-'}
