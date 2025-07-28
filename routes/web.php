@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\NotificationsController;
 use App\Http\Controllers\Admin\AdmRequestController;
 use App\Http\Controllers\Admin\LogsController;
 use App\Http\Controllers\Admin\SystemErrorLogsController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\ItemInventories\ItemInventoriesController;
 use App\Http\Controllers\ItemMasters\ItemMastersController;
@@ -39,12 +40,25 @@ use App\Http\Controllers\Orders\OrdersController;
 */
 
 Route::get('/', [LoginController::class, 'index']);
+
+// LOGIN
 Route::get('login', [LoginController::class, 'index'])->name('login');
+Route::post('post_login', [LoginController::class, 'authenticate'])->name('post_login');
+
+// REGISTER
+Route::post('email_verification', [RegisterController::class, 'sendEmailVerificationInstructions']);
+Route::get('/register/{email}', [RegisterController::class, 'getRegisterIndex']);
+Route::post('register', [RegisterController::class, 'registerSubmit']);
+Route::post('forget_session_key', [RegisterController::class, 'forgetSessionKey']);
+
+
+// RESET PASSWORD
 Route::get('/reset_password', [ResetPasswordController::class, 'getIndex'])->name('reset_password');
 Route::post('/send_resetpass_email', [ResetPasswordController::class, 'sendResetPasswordInstructions']);
 Route::get('/reset_password_email/{email}', [ResetPasswordController::class, 'getResetIndex'])->name('reset_password_email');
 Route::post('/send_resetpass_email/reset', [ResetPasswordController::class, 'resetPassword']);
-Route::post('post_login', [LoginController::class, 'authenticate'])->name('post_login');
+
+
 Route::get('/appname', [SettingsController::class, 'getAppname'])->name('app-name');
 Route::get('/applogo', [SettingsController::class, 'getApplogo'])->name('app-logo');
 Route::get('/login-details', [SettingsController::class, 'getLoginDetails'])->name('app-login-details');

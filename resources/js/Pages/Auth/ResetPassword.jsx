@@ -40,9 +40,9 @@ const ResetPassword = () => {
             <Head title='Forgot Password'/>
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black px-4 py-8">
                 {/* CARD */}
-                <div className="w-full max-w-4xl relative backdrop-blur-sm bg-white border border-gray-200/50 shadow-2xl shadow-black/20 rounded-2xl overflow-hidden">
+                <div className="w-fit md:w-full max-w-4xl relative backdrop-blur-sm bg-white border border-gray-200/50 shadow-2xl shadow-black/20 rounded-2xl overflow-hidden">
                     <div className="flex min-h-[600px]">
-                        <form onSubmit={handleSubmit} className="w-1/2 p-8 flex z-50 items-center justify-center flex-col m-5">
+                        <form onSubmit={handleSubmit} className="md:w-1/2 p-8 flex z-50 items-center justify-center flex-col m-5">
                             <p className='text-black text-xl md:text-2xl font-semibold mb-10'>Forgot Password</p>
                             <p className="text-red-300 text-xs md:text-sm w-full">
                                 *will send instructions by your email
@@ -66,7 +66,7 @@ const ResetPassword = () => {
                             </button>
                             <p className='text-xs md:text-sm mt-5 text-black '><span>Already know the password?</span> <Link href='login' className='text-gray-500 font-semibold hover:opacity-70'>Back to Login</Link></p>
                         </form>          
-                        <div className="w-1/2 bg-gradient-to-br from-gray-800 to-black text-black p-12 flex flex-col justify-center items-center text-center">
+                        <div className="w-1/2 bg-gradient-to-br hidden from-gray-800 to-black text-black p-12 md:flex flex-col justify-center items-center text-center">
                             <div>
                                 <div className='flex items-center space-x-4 justify-center mb-5 '>
                                     <img className='w-auto h-12 md:w-auto md:h-14 mb-3 z-50' src='/images/login-page/home-credit-logo.png'/>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Exports\SubmasterExport;
 use App\Helpers\CommonHelpers;
 use App\Http\Controllers\Controller;
+use App\Mail\AccountActivationMail;
 use App\Models\AdmModels\AdmPrivileges;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use App\Models\AdmUser;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -56,10 +58,21 @@ use Maatwebsite\Excel\Facades\Excel;
         public function bulkActions(Request $request){
 
             if ($request->bulkAction == 'ACTIVE'){
-                AdmUser::whereIn('id', $request->selectedIds)->update(['status' => "ACTIVE"]);
+                $emails = AdmUser::where('status', 'INACTIVE')
+                    ->whereIn('id', $request->selectedIds)
+                    ->pluck('email')
+                    ->toArray();
+
+                if (!empty($emails)) {
+                    AdmUser::whereIn('id', $request->selectedIds)
+                        ->where('status', 'INACTIVE')
+                        ->update(['status' => 'ACTIVE']);
+
+                    Mail::to($emails)->send(new AccountActivationMail());
+                }
             }
             else{
-                AdmUser::whereIn('id', $request->selectedIds)->update(['status' => "INACTIVE"]);
+                AdmUser::whereIn('id', $request->selectedIds)->where('status', 'ACTIVE')->update(['status' => "INACTIVE"]);
             }
     
             $data = [

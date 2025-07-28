@@ -2,7 +2,7 @@ import React from 'react'
 import LoginInputTooltip from '../Tooltip/LoginInputTooltip'
 
 
-const LoginInput = ({title, value, name, type, placeholder, onError, onChange, addMainClass, addTitleClass, addInputClass}) => {
+const LoginInput = ({title, value, name, type, placeholder, onError, onChange, addMainClass, addTitleClass, addInputClass, isDisabled = false}) => {
   return (
     <div className={`w-full font-poppins text-sm z-20 md:text-base ${addMainClass} relative`}>
         {title && 
@@ -10,10 +10,11 @@ const LoginInput = ({title, value, name, type, placeholder, onError, onChange, a
         }
         <div className={`relative border ${onError ? 'border-red-600' : 'border-accent'} overflow-hidden rounded-md md:rounded-lg md:border-2`}>
           <input 
-              className={`px-2 py-1 w-full placeholder:text-gray-400 md:px-3 md:py-2 ${addInputClass} focus:ring-gray-900 focus:outline-none focus:border-gray-900`} 
+              className={`px-2 py-1 w-full placeholder:text-gray-400 md:px-3 disabled:bg-gray-100 md:py-2 ${addInputClass} focus:ring-gray-900 focus:outline-none focus:border-gray-900`} 
               placeholder={placeholder}
               name={name}
               value={value}
+              disabled={isDisabled}
               onChange={onChange}
               type={type}
           />

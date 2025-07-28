@@ -147,26 +147,16 @@ class LoginController extends Controller
                 Session::put('check_user_type', null);
             }
 
-            
-
-            // $exist = Auth::user()->notifications()->where('type', 'system users')->exists();
-            // if(!$exist){
-            //     $appname = AdmSettings::where('name','appname')->pluck('content')->first() ?? 'Vram AT.';
-            //     CommonHelpers::sendNotification([
-            //         'content' => "Welcome to ".$appname." We're excited to have you here!.",
-            //         'id_adm_users' => [$users->id],
-            //         'type' => 'system users',
-            //         'is_read' => 0,
-            //         'to' => url('/')
-            //     ]);
-            // }
-
             return redirect()->intended('dashboard');
         }
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records',
             'password' => 'Incorrect email or password'
         ])->onlyInput(['email', 'password']);
+    }
+
+    public function createUser(Request $request){
+        
     }
 
     public function getOtherSessionDetails($id){
