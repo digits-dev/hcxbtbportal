@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string('has_downpayment', 10)->nullable();
             $table->decimal('downpayment_value', 18, 2)->nullable();
             $table->decimal('financed_amount', 18, 2)->nullable();
-            $table->integer('item_id')->nullable();
             $table->string('approved_contract', 255)->nullable();
             $table->unsignedInteger('created_by')->nullable();
             $table->unsignedInteger('updated_by')->nullable();
