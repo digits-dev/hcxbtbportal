@@ -11,7 +11,7 @@ class ItemInventory extends Model
 
     protected $fillable = [
         'id',
-        'item_master_id',
+        'digits_code',
         'qty',
         'created_at',
         'updated_at',
@@ -143,6 +143,6 @@ class ItemInventory extends Model
     }
 
     public function getItem() {
-        return $this->belongsTo(ItemMaster::class, 'item_master_id', 'id');
+        return $this->belongsTo(ItemMaster::class, 'digits_code', 'digits_code');
     }
 }
