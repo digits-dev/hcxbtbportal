@@ -1,11 +1,10 @@
 import { Head, useForm } from '@inertiajs/react'
 import ContentPanel from "../../Components/Table/ContentPanel"
-import { useTheme } from "../../Context/ThemeContext";
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useToast } from "../../Context/ToastContext";
-import Select from 'react-select'
 import CustomSelect from '../../Components/Dropdown/CustomSelect';
-
+import axios from 'axios';
+import InputComponent from '../../Components/Forms/Input';
 
 const CreateOrderForm = ({page_title, sku}) => {
     const { handleToast } = useToast();
@@ -13,9 +12,12 @@ const CreateOrderForm = ({page_title, sku}) => {
     const [modelFilter, setModelFilter] = useState("")
     const [colorFilter, setColorFilter] = useState("")
     const [sizeFilter, setSizeFilter] = useState("")
+    const [selectedItem, setSelectedItem] = useState(null)
+    const [selectedItemForSelect, setSelectedItemForSelect] = useState(null)
+    const [selectedProducts, setSelectedProducts] = useState([])
 
     const skuOptions = sku.map(item => ({
-        value: item.id,
+        value: item.digits_code,
         label: item.item_description,
         model: item.model,
         color: item.actual_color,
@@ -69,6 +71,12 @@ const CreateOrderForm = ({page_title, sku}) => {
       }))
   }, [modelFilter, colorFilter, sizeFilter])
 
+  const clearAllFilters = () => {
+    setModelFilter("")
+    setColorFilter("")
+    setSizeFilter("")
+  }
+
 
   const handleFileUpload = (e) => {
   console.log(data);
@@ -79,6 +87,92 @@ const CreateOrderForm = ({page_title, sku}) => {
   setData("approved_contract", file)
   }
 
+const handleSkuSelect = async (selectedOption) => {
+  if (!selectedOption) return;
+
+  try {
+    // 1. Check inventory from server
+    const response = await axios.post(`/item_inventories/check-inventory/${selectedOption.value}`);
+    const { qty } = response.data;
+
+    if (qty <= 0) {
+      Swal.fire("Out of Stock", "The selected item has no available quantity.", "warning");
+      return;
+    }
+
+    // 2. Add or update selected product if in stock
+    setSelectedProducts((prevProducts) => {
+      const existingProductIndex = prevProducts.findIndex(p => p.value === selectedOption.value);
+
+      if (existingProductIndex > -1) {
+        const updatedProducts = [...prevProducts];
+        const currentQty = updatedProducts[existingProductIndex].quantity;
+
+        if (currentQty + 1 > qty) {
+          Swal.fire("Stock Limit Reached", `Only ${qty} units are available.`, "warning");
+          return prevProducts; // No update
+        }
+
+        updatedProducts[existingProductIndex].quantity += 1;
+        return updatedProducts;
+      } else {
+        return [...prevProducts, { ...selectedOption, quantity: 1 }];
+      }
+    });
+
+    // 3. Clear the select input
+    setSelectedItemForSelect(null);
+  } catch (error) {
+    console.error("Inventory check failed", error);
+    Swal.fire("Error", "Failed to check inventory.", "error");
+  }
+};
+
+  const handleQuantityChange = async (skuValue, delta) => {
+    try {
+      // 1. Get the current stock
+      const response = await axios.post(`/item_inventories/check-inventory/${skuValue}`);
+      const { qty } = response.data;
+
+      setSelectedProducts((prevProducts) => {
+        return prevProducts.map((p) => {
+          if (p.value === skuValue) {
+            const newQty = p.quantity + delta;
+
+            if (newQty > qty) {
+              Swal.fire("Stock Limit Reached", `Only ${qty} units are available.`, "warning");
+              return p; // No change
+            }
+
+            if (newQty <= 0) {
+              return null; // Mark for removal
+            }
+
+            return { ...p, quantity: newQty };
+          }
+          return p;
+        }).filter(Boolean); // Remove nulls
+      });
+    } catch (error) {
+      console.error("Inventory check failed", error);
+      Swal.fire("Error", "Failed to check inventory.", "error");
+    }
+  };
+
+
+  const handleRemoveProduct = (skuValue) => {
+    setSelectedProducts((prevProducts) => prevProducts.filter((p) => p.value !== skuValue))
+  }
+
+  useEffect(() => {
+  const formattedItems = selectedProducts.map(p => ({
+    digits_code: p.value,
+    quantity: p.quantity
+  }));
+
+  setData("items", formattedItems);
+}, [selectedProducts]);
+
     const { data, setData, post, processing, errors, reset } = useForm({
         customer_name: "",
         delivery_address: "",
@@ -88,17 +182,38 @@ const CreateOrderForm = ({page_title, sku}) => {
         has_downpayment: "no", 
         downpayment_value: "",
         approved_contract: "",
-        item_id: "",
+        items: []
     });
 
   const handleChange = (e) => {
     const name = e.name ? e.name : e.target.name;
     const value = e.value ? e.value : e.target.value;
     setData(name, value);
-
+    console.log(data.items)
   }
 
-  const handleSubmit = (e) => {
+  const handleItemSelect = async (e) => {
+    try {
+      const response = await axios.post(`/item_inventories/check-inventory/${e.value}`);
+      const { qty } = response.data;
+
+      if (qty > 0) {
+        setSelectedItem(e); 
+        setData("digits_code", e.value); 
+      } else {
+        Swal.fire("Out of Stock", "The selected item has no available quantity.", "warning");
+        setSelectedItem(null);
+        setData("digits_code", ""); 
+      }
+    } catch (error) {
+      console.error("Inventory check failed", error);
+      Swal.fire("Error", "Failed to check inventory.", "error");
+      setSelectedItem(null);
+      setData("digits_code", "");
+    }
+  }
+
+   const handleSubmit = (e) => {
     e.preventDefault()
       post("/orders/store", {
       onSuccess: (response) => {
@@ -107,13 +222,6 @@ const CreateOrderForm = ({page_title, sku}) => {
         },
       });
   }
-
-    const clearAllFilters = () => {
-    setModelFilter("")
-    setColorFilter("")
-    setSizeFilter("")
-  }
- 
 
     return <>
       <Head title={page_title}/>
@@ -130,10 +238,10 @@ const CreateOrderForm = ({page_title, sku}) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Customer Name */}
             <div className="space-y-2">
-              <label htmlFor="customer_name" className="block text-sm font-medium text-gray-700">
+              {/* <label htmlFor="customer_name" className="block text-sm font-medium text-gray-700">
                 Customer Name
-              </label>
-              <input
+              </label> */}
+              {/* <input
                 id="customer_name"
                 name="customer_name"
                 type="text"
@@ -141,7 +249,15 @@ const CreateOrderForm = ({page_title, sku}) => {
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              /> */}
+              <InputComponent
+                  placeholder="Enter full name"
+                  name="customer_name"
+                  onChange={handleChange}
+                  onError={errors.customer_name}
               />
+
+              
             </div>
 
             {/* Delivery Address */}
@@ -322,13 +438,106 @@ const CreateOrderForm = ({page_title, sku}) => {
               </div>
 
             <CustomSelect 
-            name="item_id"
+            name="digits_code"
             placeholder="Search and select a product SKU..."
             displayName='Item Details'
+            value={selectedItemForSelect}
+            onChange={(option) => handleSkuSelect(option)}
             options={filteredSKUs}
-            onChange={handleChange}
             maxMenuHeight='300px'
             />
+             {/* Selected Products Table */}
+              {selectedProducts.length > 0 && (
+                <div className="mt-6 border border-gray-200 rounded-lg overflow-hidden">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Item Description
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Qty
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {selectedProducts.map((product) => (
+                        <tr key={product.value}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {product.label}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <div className="flex items-center justify-center space-x-2">
+                              <button
+                                type="button"
+                                onClick={() => handleQuantityChange(product.value, -1)}
+                                className="p-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                aria-label={`Decrease quantity of ${product.label}`}
+                              >
+                                <svg
+                                  className="h-4 w-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                </svg>
+                              </button>
+                              <span className="text-sm font-medium text-gray-900 w-8 text-center">
+                                {product.quantity}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleQuantityChange(product.value, 1)}
+                                className="p-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                aria-label={`Increase quantity of ${product.label}`}
+                              >
+                                <svg
+                                  className="h-4 w-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 4v16m8-8H4"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveProduct(product.value)}
+                              className="text-red-600 hover:text-red-900 text-xs font-medium"
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            
               
             {/* Upload of Approved Contract */}
             <div className="space-y-2">

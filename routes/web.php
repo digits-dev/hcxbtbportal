@@ -187,17 +187,18 @@ Route::middleware(['auth'])->group(function () {
         // BULK ACTIONS
         Route::post('/bulk_action', [AdminApiController::class, 'bulkActions']);
         
-       
-
     });
 
     Route::prefix('orders')->group(function () {
         Route::get('/create', [OrdersController::class, 'create']);
         Route::post('/store', [OrdersController::class, 'store']);
+        Route::get('/update/{id}', [OrdersController::class, 'update']);
+        Route::get('/view/{id}', [OrdersController::class, 'view']);
     });
     
     Route::prefix('item_inventories')->group(function () {
         Route::get('/export', [ItemInventoriesController::class, 'export']);
+        Route::post('/check-inventory/{digits_code}', [ItemInventoriesController::class, 'checkInventory']);
     });
 
     Route::prefix('item_masters')->group(function () {
@@ -266,3 +267,8 @@ Route::group([
         }
     }
 })->middleware('auth');
+
+
+Route::get('/upload/{encryptedId}', [OrdersController::class, 'upload']);
+// Route::get('/upload/{encryptedId}', [OrdersController::class, 'upload'])->name('proof.upload');
+Route::post('/upload-file', [OrdersController::class, 'customerUploadFile'])->name('payment.upload.store');

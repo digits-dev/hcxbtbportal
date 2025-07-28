@@ -37,6 +37,7 @@ class Orders extends Model
         'financed_amount',
         'item_id',
         'approved_contract',
+        'payment_proof',
         'created_by',
         'updated_by',
         'created_at',

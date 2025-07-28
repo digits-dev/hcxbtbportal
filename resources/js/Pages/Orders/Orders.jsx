@@ -211,13 +211,15 @@ const Orders = ({page_title, queryParams, orders}) => {
                                     <RowData center>
                                         {auth.access.isUpdate &&
                                             <RowAction
-                                                type="button"
+                                                type="link"
                                                 action="edit"
+                                                href={`orders/update/${item.id}`}
                                             />
                                         }
-                                        <RowAction
-                                            type="button"
-                                            action="view"
+                                      <RowAction
+                                        type="link"
+                                        action="view"
+                                        href={`orders/view/${item.id}`}
                                         />
                                     </RowData>
                                     {/* <RowStatus

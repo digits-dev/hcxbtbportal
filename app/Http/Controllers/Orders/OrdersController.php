@@ -5,12 +5,18 @@ namespace App\Http\Controllers\Orders;
 use App\Helpers\CommonHelpers;
 use App\Http\Controllers\Controller;
 use App\Models\Orders;
+use App\Models\OrderLines;
+use App\Models\ItemMaster;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Mail\OrderConfirmationMail;
+use App\Mail\SendProofOfPaymentLink;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Crypt;
 
 class OrdersController extends Controller
 {
@@ -50,38 +56,139 @@ class OrdersController extends Controller
 
         $data = [];
         $data['page_title'] = 'Create Order';
-        $data['sku'] = DB::connection('mysql2')->table('item_masters')
-        ->whereIn('warehouse_categories_id', [22])
-        ->select('id','upc_code', 'item_description', 'model','actual_color', 'size' )->get();
+        $data['sku'] = DB::table('item_masters')
+        ->select('digits_code', 'item_description', 'model','actual_color', 'size' )->get();
  
         return Inertia::render("Orders/CreateOrderForm", $data);
     }
 
 
-    public function store (Request $request) {
-     $timestamp = now()->timestamp;
-     $data = [
-            'reference_number' => Orders::generateReferenceNumber(),
-            'customer_name' => $request->customer_name,
-            'delivery_address' => $request->delivery_address,
-            'email_address' => $request->email_address,
-            'contact_details' => $request->contact_details,
-            'contact_details' => $request->contact_details,
-            'financed_amount' => $request->financed_amount,
-            'has_downpayment' => $request->has_downpayment,
-            'downpayment_value' => $request->downpayment_value,
-            'item_id' => $request->item_id,
-            'approved_contract' => $timestamp . '_' . $request->approved_contract->getClientOriginalName(),
-        ];
+    public function store(Request $request)
+    {
+        // Validate request data
+        $validatedData = $request->validate([
+            'customer_name'      => 'required|string|max:255',
+            'delivery_address'   => 'required|string|max:255',
+            'email_address'      => 'required|email|max:255',
+            'contact_details'    => 'required|string|max:50',
+            'financed_amount'    => 'required|numeric|min:0',
+            'has_downpayment'    => 'required|in:yes,no',
+            'downpayment_value'  => 'nullable|numeric|min:0',
+            'approved_contract'  => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'items'              => 'required|array|min:1',
+
+        ]);
+
+        $timestamp = now()->timestamp;
+
+        // Handle file upload
         if ($request->hasFile('approved_contract')) {
-            $file = $request->file('approved_contract');  
-            $filename = $timestamp . '_' . $request->approved_contract->getClientOriginalName();  
-            $file->move(public_path('contract/uploaded-contract'), $filename);  
+            $file = $request->file('approved_contract');
+            $filename = $timestamp . '_' . $file->getClientOriginalName();
+            $file->move(public_path('contract/uploaded-contract'), $filename);
         }
+
+        // Prepare order data
+        $orderData = [
+            'reference_number'   => Orders::generateReferenceNumber(),
+            'customer_name'      => $validatedData['customer_name'],
+            'delivery_address'   => $validatedData['delivery_address'],
+            'email_address'      => $validatedData['email_address'],
+            'contact_details'    => $validatedData['contact_details'],
+            'financed_amount'    => $validatedData['financed_amount'],
+            'has_downpayment'    => $validatedData['has_downpayment'],
+            'downpayment_value'  => $validatedData['downpayment_value'],
+            'approved_contract'  => $filename ?? null,
+            'order_date'         => now(),
+        ];
+
+        // Create order
+        $order = Orders::create($orderData);
+        $orderId = $order->id;
+
+        // Prepare order lines
+        $lines = [];
+        foreach ($validatedData['items'] as $item) {
+            $lines[] = [
+                'order_id'    => $orderId,
+                'digits_code' => $item['digits_code'],
+                'qty'         => $item['quantity'],
+                'created_at'  => now(),
+            ];
+        }
+        OrderLines::insert($lines);
+
+        // Prepare and send email
+        $encryptedId = Crypt::encryptString($orderId);
+
+        if ($validatedData['has_downpayment'] === 'yes') {
+            Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
+                'customer_name' => $validatedData['customer_name'],
+                'payment_link'  => url('/upload/' . $encryptedId),
+            ]));
+        } else {
+            Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
+        }
+
+        return redirect('/orders');
+    }
+
+    public function view ($id) {
+        $data = [];
+        $data['page_title'] = ' Order Details';
+        $data['order'] = Orders::where('id',$id)->first();
+        $data['lines'] = OrderLines::leftJoin('item_masters', 'item_masters.digits_code', 'order_lines.digits_code')
+        ->where('order_id', $id)->get();
+ 
+        return Inertia::render("Orders/ViewOrderDetails", $data);
+    } 
+
+    public function update($id) {
         
-            Orders::create($data);
-        
-        return redirect ('/orders');
+        $data = [];
+        $data['order'] = Orders::where('id',$id)->first();
+        $data['lines'] = OrderLines::leftJoin('item_masters', 'item_masters.digits_code', 'order_lines.digits_code')
+        ->where('order_id', $id)->get();
+ 
+        return Inertia::render("Orders/AccountingVerification", $data);
+    }
+
+    public function upload($encryptedId)
+    {
+        try {
+            $orderId = Crypt::decryptString($encryptedId);
+            $order = Orders::findOrFail($orderId);
+
+            return view('uploader', compact('order', 'encryptedId'));
+
+        } catch (DecryptException $e) {
+            abort(404); 
+        }
+    }
+
+    public function customerUploadFile(Request $request)
+    {
+        try {
+            $orderId = Crypt::decryptString($request->encrypted_id);
+            $order = Orders::findOrFail($orderId);
+
+            if ($request->hasFile('payment_proof')) {
+                $file = $request->file('payment_proof');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path->move(public_path('payment/uploaded-payment_proof'), $filename);
+
+                // Save path to database (assuming you have a column in Orders table)
+                $order->payment_proof = $filename ;
+                $order->save();
+
+                return response()->json(['success' => true, 'message' => 'File uploaded successfully.']);
+            }
+
+            return response()->json(['success' => false, 'message' => 'No file uploaded.'], 400);
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Upload failed.', 'error' => $e->getMessage()], 500);
+        }
     }
 
 }

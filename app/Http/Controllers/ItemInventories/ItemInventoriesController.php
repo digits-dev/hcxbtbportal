@@ -73,6 +73,13 @@ class ItemInventoriesController extends Controller
 
     }
 
+        public function checkInventory($digits_code)
+        {
+            $qty = ItemInventory::where('digits_code', $digits_code)->value('qty');
 
+            return response()->json([
+                'qty' => $qty ?? 0,
+            ]);
+        }
 
 }
