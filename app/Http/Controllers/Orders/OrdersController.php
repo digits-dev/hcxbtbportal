@@ -255,6 +255,7 @@ class OrdersController extends Controller
                 
                 // Implode filenames with comma separator
                 $order->payment_proof = implode(',', $uploadedFilenames);
+                $order->status = Statuses::FOR_VERIFICATION;
                 $order->save();
                 
                return response()->json(['success' => true, 'message' => 'File uploaded successfully.']);
