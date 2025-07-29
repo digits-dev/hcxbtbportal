@@ -12,7 +12,7 @@
         <div class="max-w-4xl mx-auto">
             <div class="bg-white rounded-lg shadow-md p-8">
                  {{-- Not Rejected --}}
-                @if($order->payment_proof && $order->status != 3)
+                @if($order->payment_proof && $order->status != 4)
                     <!-- Already Uploaded State -->
                     <div class="text-center">
                         <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -26,7 +26,7 @@
                 @else
                 <div class="text-center mb-8">
                <h1 class="text-2xl font-bold text-gray-900 mb-2">
-                        {{ $order->status != 3 ? 'Upload' : 'Reupload' }} Proof of Payment
+                        {{ $order->status != 4 ? 'Upload' : 'Reupload' }} Proof of Payment
                     </h1>
                     <p class="text-gray-600">Order #{{ $order->reference_number }} - Please upload your payment receipt or proof of downpayment</p>
                 </div>

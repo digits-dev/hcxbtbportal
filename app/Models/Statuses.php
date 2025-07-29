@@ -9,9 +9,10 @@ class Statuses extends Model
 {
     use HasFactory;
 
-    public const FOR_VERIFICATION = 1;
-    public const CONFIRMED = 2;
-    public const REJECTED = 3;
+    Public const FOR_UPLOADING = 1;
+    public const FOR_VERIFICATION = 2;
+    public const CONFIRMED = 3;
+    public const REJECTED = 4;
 
     protected $fillable = [
         'id',

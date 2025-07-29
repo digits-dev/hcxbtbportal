@@ -98,7 +98,7 @@ class OrdersController extends Controller
         }
 
         if ($validatedData['has_downpayment'] === 'yes') {
-            $status = Statuses::FOR_VERIFICATION;
+            $status = Statuses::FOR_UPLOADING;
         } else {
             $status =  Statuses::CONFIRMED;
         };
@@ -183,17 +183,28 @@ class OrdersController extends Controller
  
         $encryptedId = Crypt::encryptString($order->id);
         
+        $existingRejectedProofs = $order->rejected_payment_proof
+            ? explode(',', $order->rejected_payment_proof)
+            : [];
+
+        if ($order->payment_proof) {
+            $existingRejectedProofs[] = $order->payment_proof;
+        }
+
+        
         if ($request->action == 'reject') {
             Orders::where('id', $request->order_id)->update([
                 'status' => Statuses::REJECTED,
-                // 'rejected_by' => CommonHelpers::myId(),
-                // 'rejected_at' => now(),
+                'rejected_payment_proof' => implode(',', $existingRejectedProofs),
+                'payment_proof' => null,
+                'rejected_by' => CommonHelpers::myId(),
+                'rejected_at' => now(),
             ]);
 
-            Mail::to($order->email_address)->send(new ReSendProofOfPaymentLink([
-                'customer_name' => $order->customer_name,
-                'payment_link' => url('/upload/' . $encryptedId),
-            ]));
+            // Mail::to($order->email_address)->send(new ReSendProofOfPaymentLink([
+            //     'customer_name' => $order->customer_name,
+            //     'payment_link' => url('/upload/' . $encryptedId),
+            // ]));
         }else {
             Orders::where('id', $request->order_id)->update([
                 'status' => Statuses::CONFIRMED,
@@ -219,7 +230,7 @@ class OrdersController extends Controller
         }
     }
 
-    public function customerUploadFile(Request $request)
+      public function customerUploadFile(Request $request)
     {
         try {
             $orderId = Crypt::decryptString($request->encrypted_id);
@@ -243,13 +254,8 @@ class OrdersController extends Controller
                 }
                 
                 // Implode filenames with comma separator
-                $existingFilenames = $order->payment_proof ? explode(',', $order->payment_proof) : [];
-                $allFilenames = array_merge($existingFilenames, $uploadedFilenames);
-
-                $order->payment_proof = implode(',', $allFilenames);
-                $order->status = Statuses::FOR_VERIFICATION;
+                $order->payment_proof = implode(',', $uploadedFilenames);
                 $order->save();
-
                 
                return response()->json(['success' => true, 'message' => 'File uploaded successfully.']);
             }
