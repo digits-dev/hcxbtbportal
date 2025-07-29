@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Orders;
 use App\Models\OrderLines;
 use App\Models\ItemMaster;
+use App\Models\Statuses;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -53,7 +54,6 @@ class OrdersController extends Controller
     }
 
     public function create() {
-
         $data = [];
         $data['page_title'] = 'Create Order';
         $data['sku'] = DB::table('item_masters')
@@ -88,9 +88,16 @@ class OrdersController extends Controller
             $file->move(public_path('contract/uploaded-contract'), $filename);
         }
 
+        if ($validatedData['has_downpayment'] === 'yes') {
+            $status = Statuses::FOR_VERIFICATION;
+        } else {
+            $status =  Statuses::CONFIRMED;
+        };
+
         // Prepare order data
         $orderData = [
             'reference_number'   => Orders::generateReferenceNumber(),
+            'status'             => $status,
             'customer_name'      => $validatedData['customer_name'],
             'delivery_address'   => $validatedData['delivery_address'],
             'email_address'      => $validatedData['email_address'],
@@ -121,14 +128,16 @@ class OrdersController extends Controller
         // Prepare and send email
         $encryptedId = Crypt::encryptString($orderId);
 
-        if ($validatedData['has_downpayment'] === 'yes') {
-            Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
-                'customer_name' => $validatedData['customer_name'],
-                'payment_link'  => url('/upload/' . $encryptedId),
-            ]));
-        } else {
-            Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
-        }
+        // if ($validatedData['has_downpayment'] === 'yes') {
+        //     Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
+        //         'customer_name' => $validatedData['customer_name'],
+        //         'payment_link'  => url('/upload/' . $encryptedId),
+        //     ]));
+        // } else {
+        //     Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
+        // }
+
+        
 
         return redirect('/orders');
     }
@@ -151,6 +160,25 @@ class OrdersController extends Controller
         ->where('order_id', $id)->get();
  
         return Inertia::render("Orders/AccountingVerification", $data);
+    }
+
+    public function updateSave(Request $request) {
+        dd($request->all());
+        $timestamp = now()->timestamp;
+        if ($request->hasFile('dp_receipt')) {
+            $file = $request->file('dp_receipt');
+            $filename = $timestamp . '_' . $file->getClientOriginalName();
+            $file->move(public_path('dp-receipt/uploaded-receipt'), $filename);
+        }
+
+        Orders::where('id', $request->order_id)->update([
+            'status' => Statuses::CONFIRMED,
+            'dp_receipt' => $filename,
+            'verified_by_acctg' => CommonHelpers::myId(),
+            'verified_at_acctg' => now(),
+        ]);
+        
+      return redirect('/orders');
     }
 
     public function upload($encryptedId)

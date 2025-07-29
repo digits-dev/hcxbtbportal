@@ -44,6 +44,16 @@ return [
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN'),
+            'stream' => [
+                'ssl' => [
+                    'allow_self_signed' => true,
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                ],
+            ],
+            
+             'auth_mode'  => null,
+             'verify_peer'       => false,
         ],
 
         'ses' => [
@@ -69,6 +79,8 @@ return [
             'transport' => 'sendmail',
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
         ],
+
+        
 
         'log' => [
             'transport' => 'log',
@@ -112,6 +124,7 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    
     /*
     |--------------------------------------------------------------------------
     | Markdown Mail Settings
