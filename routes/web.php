@@ -194,6 +194,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/create', [OrdersController::class, 'create']);
         Route::post('/store', [OrdersController::class, 'store']);
         Route::get('/update/{id}', [OrdersController::class, 'update']);
+        Route::post('/update_save', [OrdersController::class, 'updateSave']);
         Route::get('/view/{id}', [OrdersController::class, 'view']);
     });
     

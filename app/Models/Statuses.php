@@ -11,6 +11,7 @@ class Statuses extends Model
 
     public const FOR_VERIFICATION = 1;
     public const CONFIRMED = 2;
+    public const REJECTED = 3;
 
     protected $fillable = [
         'id',

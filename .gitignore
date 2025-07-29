@@ -5,7 +5,7 @@
 /public/storage
 /public/contract
 /public/payment
-/public/dp-reciept
+/public/dp-receipt
 /storage/*.key
 /vendor
 .env
