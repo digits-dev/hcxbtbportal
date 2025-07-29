@@ -16,6 +16,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use App\Mail\OrderConfirmationMail;
 use App\Mail\SendProofOfPaymentLink;
+use App\Mail\ReSendProofOfPaymentLink;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Crypt;
 
@@ -163,21 +164,38 @@ class OrdersController extends Controller
     }
 
     public function updateSave(Request $request) {
-        dd($request->all());
         $timestamp = now()->timestamp;
         if ($request->hasFile('dp_receipt')) {
             $file = $request->file('dp_receipt');
             $filename = $timestamp . '_' . $file->getClientOriginalName();
             $file->move(public_path('dp-receipt/uploaded-receipt'), $filename);
         }
+    
+        $order = Orders::where('id', $request->order_id)->first();
 
-        Orders::where('id', $request->order_id)->update([
-            'status' => Statuses::CONFIRMED,
-            'dp_receipt' => $filename,
-            'verified_by_acctg' => CommonHelpers::myId(),
-            'verified_at_acctg' => now(),
-        ]);
+ 
+        $encryptedId = Crypt::encryptString($order->id);
         
+        if ($request->action == 'reject') {
+            Orders::where('id', $request->order_id)->update([
+                'status' => Statuses::REJECTED,
+                // 'rejected_by' => CommonHelpers::myId(),
+                // 'rejected_at' => now(),
+            ]);
+
+            Mail::to($order->email_address)->send(new ReSendProofOfPaymentLink([
+                'customer_name' => $order->customer_name,
+                'payment_link' => url('/upload/' . $encryptedId),
+            ]));
+        }else {
+            Orders::where('id', $request->order_id)->update([
+                'status' => Statuses::CONFIRMED,
+                'dp_receipt' => $filename,
+                'verified_by_acctg' => CommonHelpers::myId(),
+                'verified_at_acctg' => now(),
+            ]);
+        }
+            
       return redirect('/orders');
     }
 
@@ -201,15 +219,32 @@ class OrdersController extends Controller
             $order = Orders::findOrFail($orderId);
 
             if ($request->hasFile('payment_proof')) {
-                $file = $request->file('payment_proof');
-                $filename = time() . '_' . $file->getClientOriginalName();
-                $path->move(public_path('payment/uploaded-payment_proof'), $filename);
+                $files = $request->file('payment_proof'); 
+                $uploadedFilenames = [];
+                
+                $uploadPath = public_path('payment/uploaded-payment_proof');
+                
+                // Loop through each uploaded file
+                foreach ($files as $file) {
+                    $filename = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+                    $file->move($uploadPath, $filename);
+                    $uploadedFilenames[] = $filename;
+                }
+                
+                if (empty($uploadedFilenames)) {
+                    return response()->json(['success' => false, 'message' => 'No valid image files uploaded.'], 400);
+                }
+                
+                // Implode filenames with comma separator
+                $existingFilenames = $order->payment_proof ? explode(',', $order->payment_proof) : [];
+                $allFilenames = array_merge($existingFilenames, $uploadedFilenames);
 
-                // Save path to database (assuming you have a column in Orders table)
-                $order->payment_proof = $filename ;
+                $order->payment_proof = implode(',', $allFilenames);
+                $order->status = Statuses::FOR_VERIFICATION;
                 $order->save();
 
-                return response()->json(['success' => true, 'message' => 'File uploaded successfully.']);
+                
+               return response()->json(['success' => true, 'message' => 'File uploaded successfully.']);
             }
 
             return response()->json(['success' => false, 'message' => 'No file uploaded.'], 400);

@@ -247,24 +247,24 @@ const ViewOrderDetails = ({ page_title, order, lines }) => {
                                     </div>
 
                                     {/* Contract Information Section */}
-                                    {order.payment_proof && (
+                                    {order.approved_contract && (
                                         <div className="bg-green-50 p-4 rounded-lg">
                                             <h3 className="text-lg font-medium text-gray-900 mb-4">
                                                 Contract Information
                                             </h3>
                                             <div className="bg-white border border-gray-200 rounded-lg p-4">
                                                 <div className="mb-4">
-                                                    {order.payment_proof.endsWith(
+                                                    {order.approved_contract.endsWith(
                                                         ".pdf"
                                                     ) ? (
                                                         <iframe
-                                                            src={`/payment/uploaded-payment_proof/${order.payment_proof}`}
+                                                            src={`/contract/uploaded-contract/${order.approved_contract}`}
                                                             className="w-full h-96 border rounded"
                                                             title="PDF Viewer"
                                                         ></iframe>
                                                     ) : (
                                                         <img
-                                                            src={`/payment/uploaded-payment_proof/${order.payment_proof}`}
+                                                            src={`/contract/uploaded-contract/${order.approved_contract}`}
                                                             alt="Proof of Payment"
                                                             className="max-w-full h-auto rounded"
                                                         />
@@ -286,9 +286,11 @@ const ViewOrderDetails = ({ page_title, order, lines }) => {
                                                     </svg>
                                                     <div className="flex-1">
                                                         <div className="font-medium text-gray-900">
-                                                            {
-                                                                order.payment_proof
-                                                            }
+                                                            {order.approved_contract.substring(
+                                                                order.approved_contract.lastIndexOf(
+                                                                    "_"
+                                                                ) + 1
+                                                            )}
                                                         </div>
                                                         <div className="text-sm text-gray-500">
                                                             Approved contract
@@ -296,7 +298,7 @@ const ViewOrderDetails = ({ page_title, order, lines }) => {
                                                         </div>
                                                     </div>
                                                     <a
-                                                        href={`/payment/uploaded-payment_proof/${order.payment_proof}`}
+                                                        href={`/contract/uploaded-contract/${order.approved_contract}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
@@ -308,68 +310,95 @@ const ViewOrderDetails = ({ page_title, order, lines }) => {
                                         </div>
                                     )}
 
-                                    {/* Payment Proof Section */}
-                                    {order.payment_proof && (
-                                        <div className="bg-green-50 p-4 rounded-lg">
-                                            <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                                Proof of Payment
-                                            </h3>
-                                            <div className="bg-white border border-gray-200 rounded-lg p-4">
-                                                <div className="mb-4">
-                                                    {order.payment_proof.endsWith(
-                                                        ".pdf"
-                                                    ) ? (
-                                                        <iframe
-                                                            src={`/payment/uploaded-payment_proof/${order.payment_proof}`}
-                                                            className="w-full h-96 border rounded"
-                                                            title="PDF Viewer"
-                                                        ></iframe>
-                                                    ) : (
-                                                        <img
-                                                            src={`/payment/uploaded-payment_proof/${order.payment_proof}`}
-                                                            alt="Proof of Payment"
-                                                            className="max-w-full h-auto rounded"
-                                                        />
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <svg
-                                                        className="h-8 w-8 text-green-600"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
+                                    {order.payment_proof &&
+                                        (() => {
+                                            const images = order.payment_proof
+                                                .split(",")
+                                                .map((f) => f.trim());
+                                            const isSingleImage =
+                                                images.length === 1;
+
+                                            return (
+                                                <div className="bg-green-50 p-4 rounded-lg">
+                                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                                        Proof of Payment
+                                                    </h3>
+                                                    <div
+                                                        className={
+                                                            isSingleImage
+                                                                ? ""
+                                                                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+                                                        }
                                                     >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                        />
-                                                    </svg>
-                                                    <div className="flex-1">
-                                                        <div className="font-medium text-gray-900">
-                                                            {
-                                                                order.payment_proof
+                                                        {images.map(
+                                                            (
+                                                                filename,
+                                                                index
+                                                            ) => {
+                                                                const displayName =
+                                                                    filename.substring(
+                                                                        filename.lastIndexOf(
+                                                                            "_"
+                                                                        ) + 1
+                                                                    );
+                                                                const fileUrl = `/payment/uploaded-payment_proof/${filename}`;
+                                                                return (
+                                                                    <div
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                        className={`bg-white border border-gray-200 rounded-lg p-4 ${
+                                                                            isSingleImage
+                                                                                ? "max-w-3xl mx-auto"
+                                                                                : ""
+                                                                        }`}
+                                                                    >
+                                                                        <img
+                                                                            src={
+                                                                                fileUrl
+                                                                            }
+                                                                            alt={`Payment Proof ${
+                                                                                index +
+                                                                                1
+                                                                            }`}
+                                                                            className={`rounded shadow-sm ${
+                                                                                isSingleImage
+                                                                                    ? "w-full h-auto"
+                                                                                    : "w-full h-48 object-contain"
+                                                                            }`}
+                                                                        />
+                                                                        <div
+                                                                            className="mt-2 text-sm text-gray-600 text-center truncate"
+                                                                            title={
+                                                                                displayName
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                displayName
+                                                                            }
+                                                                        </div>
+                                                                        <div className="mt-2 text-center">
+                                                                            <a
+                                                                                href={
+                                                                                    fileUrl
+                                                                                }
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="inline-block px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                                                                            >
+                                                                                View
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                );
                                                             }
-                                                        </div>
-                                                        <div className="text-sm text-gray-500">
-                                                            Proof of Payment
-                                                        </div>
+                                                        )}
                                                     </div>
-                                                    <a
-                                                        href={`/payment/uploaded-payment_proof/${order.payment_proof}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
-                                                    >
-                                                        View
-                                                    </a>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    )}
+                                            );
+                                        })()}
 
-                                    {/* Upload of Approved Contract */}
+                                    {/* Upload of Downpayment Receipt */}
                                     <div className="space-y-2">
                                         <label
                                             htmlFor="dp_receipt"
