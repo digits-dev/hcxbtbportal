@@ -168,6 +168,26 @@ class AdmModulesSeeder extends Seeder
                 'is_active' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
             ],
+            [
+                'name' => 'Deliveries',
+                'icon' => 'fa-solid fa-truck',
+                'path' => 'deliveries',
+                'table_name' => 'deliveries',
+                'controller' => 'Deliveries\DeliveriesController',
+                'is_protected' => 0,
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+            ],
+            [
+                'name' => 'Statuses',
+                'icon' => 'fa-regular fa-circle',
+                'path' => 'statuses',
+                'table_name' => 'statuses',
+                'controller' => 'Statuses\StatusesController',
+                'is_protected' => 0,
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+            ],
 
         ];
 

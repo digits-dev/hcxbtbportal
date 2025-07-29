@@ -5,30 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Statuses extends Model
+class Deliveries extends Model
 {
     use HasFactory;
 
-    public const FOR_VERIFICATION = 1;
-    public const CONFIRMED = 2;
-
     protected $fillable = [
         'id',
-        'name',
-        'color',
-        'created_by',
-        'updated_by',
+        'reference_number',
+        'received_at',
         'created_at',
-        'updated_at',
     ];
 
     protected $filterable = [
-        'name',
-        'color',
-        'created_by',
-        'updated_by',
+        'reference_number',
+        'received_at',
         'created_at',
-        'updated_at',
     ];
 
     public function scopeSearchAndFilter($query, $request){
@@ -98,5 +89,9 @@ class Statuses extends Model
     
         return $query;
         
+    }
+
+    public function getLines(){
+        return $this->hasMany(DeliveryLines::class, 'dr_id', 'id');
     }
 }

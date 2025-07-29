@@ -34,7 +34,7 @@ const InputComponent = ({
                     disabled={disabled}
                     onChange={onChange}
                     placeholder={placeholder}
-                    className={`${theme === 'bg-skin-black' ? theme+' text-gray-300 disabled:bg-skin-black' : 'bg-white'} mt-1 block w-full text-xs md:text-sm px-3 py-2 border disabled:bg-gray-100  ${onError ? 'border-red-600' : 'border-accent'} placeholder:text-sm focus:ring-[1.5px] focus:ring-blue-500 placeholder:text-gray-400  rounded-md shadow-sm focus:outline-none focus:border-skin-blue sm:text-sm ${inputClass}`}
+                    className={`${theme === 'bg-skin-black' ? theme+' text-gray-300 disabled:bg-skin-black' : 'bg-white'} mt-1 block w-full text-xs md:text-sm px-3 py-2 border disabled:bg-gray-100  ${onError ? 'border-red-600' : 'border-accent'} placeholder:text-sm focus:ring-[1.5px] focus:ring-black placeholder:text-gray-400  rounded-md shadow-sm focus:outline-none focus:border-black sm:text-sm ${inputClass}`}
                     checked={checked}
                     style={type === "date" ? { padding: "7px", fontSize: "14px" } : {}}
                 />

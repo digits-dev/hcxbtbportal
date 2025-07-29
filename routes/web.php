@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\LogsController;
 use App\Http\Controllers\Admin\SystemErrorLogsController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Deliveries\DeliveriesController;
 use App\Http\Controllers\ItemInventories\ItemInventoriesController;
 use App\Http\Controllers\ItemMasters\ItemMastersController;
 use App\Http\Controllers\Users\ChangePasswordController;
@@ -26,7 +27,7 @@ use Illuminate\Support\Facades\Log;
 
 
 use App\Http\Controllers\Orders\OrdersController;
-
+use App\Http\Controllers\Statuses\StatusesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -203,6 +204,15 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('item_masters')->group(function () {
         Route::get('/export', [ItemMastersController::class, 'export']);
+    });
+    
+    Route::prefix('deliveries')->group(function () {
+        Route::get('/delivery_details/{id}', [DeliveriesController::class, 'deliveryDetails']);
+    });
+
+    Route::prefix('statuses')->group(function () {
+        Route::post('/create', [StatusesController::class, 'create']);
+        Route::post('/update', [StatusesController::class, 'update']);
     });
     
 });

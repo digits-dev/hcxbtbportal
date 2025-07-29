@@ -40,29 +40,65 @@ class AdmMenusSeeder extends Seeder
                 'sorting'           => 2
             ],
             [
-                'name'              => 'Item Inventory',
+                'name'              => 'Item Master',
                 'type'              => 'Route',
-                'path'              => 'ItemInventories\ItemInventoriesControllerGetIndex',
-                'slug'              => 'item_inventories',
-                'icon'              => 'fa-solid fa-check',
-                'parent_id'         => 0,
+                'path'              => 'ItemMasters\ItemMastersControllerGetIndex',
+                'slug'              => 'item_masters',
+                'icon'              => 'fa-solid fa-box-archive',
+                'parent_id'         => 8,
                 'is_active'         => 1,
                 'is_dashboard'      => 1,
                 'id_adm_privileges' => 1,
                 'sorting'           => 3
             ],
             [
-                'name'              => 'Item Master',
+                'name'              => 'Item Inventory',
                 'type'              => 'Route',
-                'path'              => 'ItemMasters\ItemMastersControllerGetIndex',
-                'slug'              => 'item_masters',
-                'icon'              => 'fa-solid fa-box-archive',
-                'parent_id'         => 0,
+                'path'              => 'ItemInventories\ItemInventoriesControllerGetIndex',
+                'slug'              => 'item_inventories',
+                'icon'              => 'fa-solid fa-check',
+                'parent_id'         => 8,
+                'is_active'         => 1,
+                'is_dashboard'      => 1,
+                'id_adm_privileges' => 1,
+                'sorting'           => 1
+            ],
+            [
+                'name'              => 'Deliveries',
+                'type'              => 'Route',
+                'path'              => 'Deliveries\DeliveriesControllerGetIndex',
+                'slug'              => 'deliveries',
+                'icon'              => 'fa-solid fa-truck',
+                'parent_id'         => 8,
+                'is_active'         => 1,
+                'is_dashboard'      => 1,
+                'id_adm_privileges' => 1,
+                'sorting'           => 2
+            ],
+            [
+                'name'              => 'Statuses',
+                'type'              => 'Route',
+                'path'              => 'Statuses\StatusesControllerGetIndex',
+                'slug'              => 'statuses',
+                'icon'              => 'fa-regular fa-circle',
+                'parent_id'         => 8,
                 'is_active'         => 1,
                 'is_dashboard'      => 1,
                 'id_adm_privileges' => 1,
                 'sorting'           => 4
             ],
+            [
+                'name'              => 'Submaster',
+                'type'              => 'URL',
+                'path'              => '#',
+                'icon'              => 'fa-solid fa-bars',
+                'parent_id'         => 0,
+                'is_active'         => 1,
+                'is_dashboard'      => 1,
+                'id_adm_privileges' => 1,
+                'sorting'           => 3
+            ],
+         
         ];
 
         foreach ($menus as $menu) {

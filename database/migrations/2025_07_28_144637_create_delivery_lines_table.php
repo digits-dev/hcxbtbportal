@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('statuses', function (Blueprint $table) {
+        Schema::create('delivery_lines', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->string('color')->nullable();
-            $table->string('status')->default('ACTIVE');
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->string('reference_number')->nullable();
+            $table->integer('dr_id')->nullable();
+            $table->string('item_code')->nullable();
+            $table->integer('qty')->nullable();
+            $table->timestamp('received_at')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('statuses');
+        Schema::dropIfExists('delivery_lines');
     }
 };
