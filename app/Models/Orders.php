@@ -107,6 +107,10 @@ class Orders extends Model
         
     }
 
+    public function getStatus() {
+        return $this->belongsTo(Statuses::class, 'status', 'id');
+    }
+
     public function getCreatedBy() {
         return $this->belongsTo(AdmUser::class, 'created_by', 'id');
     }
@@ -115,7 +119,7 @@ class Orders extends Model
         return $this->belongsTo(AdmUser::class, 'updated_by', 'id');
     }
 
-      public static function generateReferenceNumber()
+    public static function generateReferenceNumber()
     {
         $maxId = self::max('id'); 
         $nextId = $maxId + 1; 

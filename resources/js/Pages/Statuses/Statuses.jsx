@@ -122,6 +122,13 @@ const Statuses = ({page_title, queryParams, statuses}) => {
                                 Action
                             </TableHeader>
                             <TableHeader
+                                name="status"
+                                queryParams={queryParams}
+                                width="md"
+                            >
+                                Status
+                            </TableHeader>
+                            <TableHeader
                                 name="name"
                                 queryParams={queryParams}
                                 width="lg"
@@ -201,11 +208,28 @@ const Statuses = ({page_title, queryParams, statuses}) => {
                                             }}
                                         />
                                     </RowData>
+                                    <RowStatus
+                                        systemStatus={
+                                            item.status === "ACTIVE"
+                                                ? "active"
+                                                : "inactive"
+                                        }
+                                    >
+                                        {item.status === "ACTIVE"
+                                            ? "ACTIVE"
+                                            : "INACTIVE"}
+                                    </RowStatus>
                                     <RowData>
                                         {item.name ?? '-'}
                                     </RowData>
                                     <RowData>
                                         {item.color ?? '-'}
+                                    </RowData>
+                                    <RowData>
+                                        {item.get_created_by?.name ?? '-'}
+                                    </RowData>
+                                    <RowData>
+                                        {item.get_updated_by?.name ?? '-'}
                                     </RowData>
                                     <RowData>
                                         {item.created_at ? (moment(item.created_at).format("YYYY-MM-DD HH:mm:ss")) : '-'}

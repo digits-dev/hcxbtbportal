@@ -38,6 +38,8 @@ const Orders = ({page_title, queryParams, orders}) => {
         router.get(pathname);
     };
 
+    console.log(orders)
+
     return (
         <>
             <Head title={page_title}/>
@@ -103,13 +105,13 @@ const Orders = ({page_title, queryParams, orders}) => {
                             >
                                 Action
                             </TableHeader>
-                            {/* <TableHeader
+                            <TableHeader
                                 name="status"
                                 queryParams={queryParams}
                                 width="sm"
                             >
                                 Status
-                            </TableHeader> */}
+                            </TableHeader>
                             <TableHeader
                                 name="reference_number"
                                 queryParams={queryParams}
@@ -214,17 +216,11 @@ const Orders = ({page_title, queryParams, orders}) => {
                                         href={`orders/view/${item.id}`}
                                         />
                                     </RowData>
-                                    {/* <RowStatus
-                                        systemStatus={
-                                            item.status === "1"
-                                                ? "active"
-                                                : "inactive"
-                                        }
+                                    <RowStatus 
+                                        color={item?.get_status?.color}
                                     >
-                                        {item.status === "1"
-                                            ? "ACTIVE"
-                                            : "INACTIVE"}
-                                    </RowStatus> */}
+                                        {item?.get_status?.name ?? '-'}
+                                    </RowStatus>
                                     <RowData>
                                         {item.reference_number ?? '-'}
                                     </RowData>

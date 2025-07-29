@@ -100,4 +100,12 @@ class Statuses extends Model
         return $query;
         
     }
+
+    public function getCreatedBy() {
+        return $this->belongsTo(AdmUser::class, 'created_by', 'id');
+    }
+    
+    public function getUpdatedBy() {
+        return $this->belongsTo(AdmUser::class, 'updated_by', 'id');
+    }
 }

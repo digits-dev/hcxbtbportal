@@ -26,7 +26,7 @@ class StatusesController extends Controller
     }
 
     public function getAllData(){
-        $query = Statuses::query();
+        $query = Statuses::query()->with('getCreatedBy', 'getUpdatedBy');
         $filter = $query->searchAndFilter(request());
         $result = $filter->orderBy($this->sortBy, $this->sortDir);
         return $result;

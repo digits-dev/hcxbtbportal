@@ -33,7 +33,7 @@ class OrdersController extends Controller
     }
 
     public function getAllData(){
-        $query = Orders::query()->with(['getCreatedBy', 'getUpdatedBy']);
+        $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy']);
         $filter = $query->searchAndFilter(request());
         $result = $filter->orderBy($this->sortBy, $this->sortDir);
         return $result;
