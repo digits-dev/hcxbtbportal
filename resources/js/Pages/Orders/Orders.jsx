@@ -108,7 +108,7 @@ const Orders = ({page_title, queryParams, orders}) => {
                             <TableHeader
                                 name="status"
                                 queryParams={queryParams}
-                                width="sm"
+                                width="md"
                             >
                                 Status
                             </TableHeader>

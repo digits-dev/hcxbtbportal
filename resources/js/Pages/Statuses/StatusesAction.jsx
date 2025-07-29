@@ -7,7 +7,7 @@ import InputComponent from '../../Components/Forms/Input';
 import { router, useForm, usePage } from '@inertiajs/react';
 import DropdownSelect from '../../Components/Dropdown/Dropdown';
 
-const StatusesAction = ({action, onClose, updateData, all_active_brand_groups, all_brand_groups}) => {
+const StatusesAction = ({action, onClose, updateData}) => {
     const { theme } = useTheme();
     const { handleToast } = useToast();
     const { auth } = usePage().props;
@@ -18,7 +18,7 @@ const StatusesAction = ({action, onClose, updateData, all_active_brand_groups, a
     const { data, setData, processing, reset, post, errors } = useForm({
         id: "" || updateData.id,
         name: "" || updateData.name,
-        color: "#000000" || updateData.color,
+        color: updateData.color || "#000000",
         status: "" || updateData.status,
     });
 

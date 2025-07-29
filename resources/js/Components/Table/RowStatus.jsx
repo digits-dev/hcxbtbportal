@@ -49,7 +49,7 @@ const RowStatus = ({
                     ) : (
                         <div
                             style={{ background: color }}
-                            className={`mx-auto ${addStatusClass} w-fit text-[12px] rounded-[9px] ${
+                            className={`mx-auto ${addStatusClass} w-fit text-nowrap font-semibold text-[12px] rounded-[9px] ${
                                 color && "text-white"
                             } px-3 py-1 `}
                         >
