@@ -81,7 +81,7 @@ class AdmMenusSeeder extends Seeder
                 'path'              => 'Statuses\StatusesControllerGetIndex',
                 'slug'              => 'statuses',
                 'icon'              => 'fa-regular fa-circle',
-                'parent_id'         => 8,
+                'parent_id'         => 7,
                 'is_active'         => 1,
                 'is_dashboard'      => 1,
                 'id_adm_privileges' => 1,
