@@ -80,6 +80,14 @@ class OrdersController extends Controller
 
         ]);
 
+        // Check DEM DB connection first
+        try {
+            DB::connection('dem')->getPdo(); // Try connecting
+        } catch (\Exception $e) {
+            Log::error('DEM DB connection failed: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Unable to connect to the DEM database. Please try again later.']);
+        }
+
         $timestamp = now()->timestamp;
 
         // Handle file upload
@@ -129,16 +137,15 @@ class OrdersController extends Controller
         // Prepare and send email
         $encryptedId = Crypt::encryptString($orderId);
 
-        // if ($validatedData['has_downpayment'] === 'yes') {
-        //     Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
-        //         'customer_name' => $validatedData['customer_name'],
-        //         'payment_link'  => url('/upload/' . $encryptedId),
-        //     ]));
-        // } else {
-        //     Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
-        // }
-
-        
+        if ($validatedData['has_downpayment'] === 'yes') {
+            Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
+                'customer_name' => $validatedData['customer_name'],
+                'payment_link'  => url('/upload/' . $encryptedId),
+            ]));
+        } else {
+            Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
+            self::createDemTransaction($orderId);
+        }
 
         return redirect('/orders');
     }
@@ -254,4 +261,34 @@ class OrdersController extends Controller
         }
     }
 
+    public function createDemTransaction($headerId){
+        $headerDatas = Orders::find($headerId);
+        $orderLinesDatas = OrderLines::where('order_id',$headerId)->get();
+        $dem_order_id = DB::connection('dem')->table('order_header')->insertGetId([
+            'order_no'                 => $headerDatas->reference_number,
+            'status'                   => 4,
+            'platform_name_id'         => 37,
+            'billing_email'            => $headerDatas->email_address,
+            'billing_phone'            => $headerDatas->contact_details,
+            'complete_billing_address' => $headerDatas->delivery_address,
+            'items_subtotal'           => $headerDatas->items_subtotal,
+            'order_total'              => $headerDatas->order_total,
+            'total_quantity'           => $headerDatas->total_quantity,
+            'created_by'               => 1000, //DEM Creator
+		    'created_at'               => date('Y-m-d H:i:s')
+        ]);
+
+        foreach($orderLinesDatas ?? [] as $key => $val){
+            $items = DB::connection('dem')->table('product')->where('digits_code',$val->digits_code)->first() ?? NULL;
+            DB::connection('dem')->table('order_body')->insert([
+                'items_id'         => $dem_order_id . $items->id,
+                'header_id'        => $dem_order_id,
+                'item_id'          => $items->id,
+                'sku'              => $items->digits_code ?? $val->digits_code,
+                'item_description' => $items->item_description,
+                'cost'             => $items->price ?? $val->item_cost,
+                'quantity'         => $val->qty
+            ]);
+        }
+    }
 }
