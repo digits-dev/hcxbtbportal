@@ -18,7 +18,7 @@
             background-color: #f9f9f9;
         }
         .header {
-            background-color: #e11931;
+            background-color: black;
             color: #ffffff;
             padding: 10px 20px;
             text-align: center;
@@ -33,7 +33,7 @@
             margin: 20px 0;
             background-color: #28a745;
             color: #ffffff;
-            text-decoration: none;
+            text-decoration: none !important;
             border-radius: 5px;
         }
         .footer {

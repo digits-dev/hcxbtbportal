@@ -329,27 +329,64 @@ class OrdersController extends Controller
                     'scheduled_by_logistics' => CommonHelpers::myId(),
                     'scheduled_at_logistics' => now(),
                 ]);
+                
         }else if ($order->status == Statuses::FOR_DELIVERY)
         {
-              $request->validate([
+            self::approveReservation($order->id);
+            $request->validate([
                          'proof_of_delivery'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
                     ]);
 
-                $timestamp = now()->timestamp;
-                    if ($request->hasFile('proof_of_delivery')) {
-                        $file = $request->file('proof_of_delivery');
-                        $filename = $timestamp . '_' . $file->getClientOriginalName();
-                        $file->move(public_path('delivery/proof_of_delivery'), $filename);
-                    }        
+            $timestamp = now()->timestamp;
+                if ($request->hasFile('proof_of_delivery')) {
+                    $file = $request->file('proof_of_delivery');
+                    $filename = $timestamp . '_' . $file->getClientOriginalName();
+                    $file->move(public_path('delivery/proof_of_delivery'), $filename);
+                }        
             Orders::where('id', $request->order_id)->update([
                     'status' => Statuses::TO_CLOSE,
                     'proof_of_delivery' => $filename,
                     'scheduled_by_logistics' => CommonHelpers::myId(),
                     'scheduled_at_logistics' => now(),
                 ]);
+                
         }
             
       return redirect('/orders');
+    }
+
+    public function approveReservation($orderId)
+        {
+        $reservations = ItemReservation::where('order_id', $orderId)
+                        ->where('status', 'reserved')
+                        ->get();
+        if ($reservations->isEmpty()) {
+            return response()->json(['message' => 'No reserved items found for this order.'], 404);
+        }
+
+        foreach ($reservations as $reservation) {
+            $item = ItemInventory::where('digits_code', $reservation->digits_code)->first();
+
+            if (!$item) {
+                return response()->json(['message' => "Item with code {$reservation->digits_code} not found."], 404);
+            }
+
+            // if ($item->reserved_qty < $reservation->quantity || $item->qty < $reservation->quantity) {
+            //     return response()->json([
+            //         'message' => "Inventory inconsistency for item {$reservation->digits_code}.",
+            //     ], 400);
+            // }
+
+            // Deduct from stock and reserved
+            $item->qty -= $reservation->quantity;
+            $item->reserved_qty -= $reservation->quantity;
+            $item->save();
+
+            // Update reservation status
+            $reservation->status = 'deducted';
+            $reservation->save();
+        }
+
     }
 
     public function upload($encryptedId)

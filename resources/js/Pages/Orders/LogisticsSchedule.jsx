@@ -84,7 +84,9 @@ const LogisticsSchedule = ({ page_title, order, lines }) => {
                                                     Customer Name
                                                 </label>
                                                 <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
-                                                    {order.customer_name}
+                                                    {order.first_name +
+                                                        " " +
+                                                        order.last_name}
                                                 </div>
                                             </div>
 
