@@ -284,10 +284,10 @@ class OrdersController extends Controller
 
                     $encryptedId = Crypt::encryptString($order->id);
 
-                    // Mail::to($order->email_address)->send(new ReSendProofOfPaymentLink([
-                    //     'customer_name' => $order->customer_name,
-                    //     'payment_link' => url('/upload/' . $encryptedId),
-                    // ]));
+                    Mail::to($order->email_address)->send(new ReSendProofOfPaymentLink([
+                        'customer_name' => $order->first_name." ".$order->last_name,
+                        'payment_link' => url('/upload/' . $encryptedId),
+                    ]));
                 }else {
 
                     $request->validate([
@@ -317,7 +317,7 @@ class OrdersController extends Controller
 
                     Mail::to($order->email_address)->send(new OrderConfirmationMail($orderData));
 
-                    //  self::createDemTransaction($order->id);
+                     self::createDemTransaction($order->id);
 
                 }
         }else if ($order->status == Statuses::FOR_SCHEDULE) {

@@ -196,6 +196,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/update/{id}', [OrdersController::class, 'update']);
         Route::post('/update_save', [OrdersController::class, 'updateSave']);
         Route::get('/view/{id}', [OrdersController::class, 'view']);
+        Route::get('/export', [OrdersController::class, 'export']);
     });
     
     Route::prefix('item_inventories')->group(function () {
