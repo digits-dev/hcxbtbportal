@@ -213,6 +213,9 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                                         <th className="px-4 py-2 font-medium text-gray-600">
                                                             Storage
                                                         </th>
+                                                        <th className="px-4 py-2 font-medium text-gray-600">
+                                                            Qty
+                                                        </th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-100">
@@ -237,6 +240,9 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                                                 </td>
                                                                 <td className="px-4 py-2 text-gray-900">
                                                                     {item.size}
+                                                                </td>
+                                                                <td className="px-4 py-2 text-gray-900">
+                                                                    {item.qty}
                                                                 </td>
                                                             </tr>
                                                         )
