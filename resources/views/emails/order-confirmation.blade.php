@@ -146,7 +146,7 @@
         .product-detail {
             display: table-cell;
             padding: 5px 10px 5px 0;
-            color: #6b7280;
+            color: black;
             font-size: 14px;
         }
         
@@ -361,20 +361,20 @@
                 </div>
             </div>
             
-            {{-- <!-- Product Information -->
-            <div class="section">
-                <h2 class="section-title">Product Details</h2>
-                <div class="product-card">
-                    <h3 class="product-name">{{ $orderselectedSKU['label'] }}</h3>
-                    <div class="product-details">
-                        <div class="product-detail"><strong>SKU:</strong> {{ $orderselectedSKU['value'] }}</div>
-                        <div class="product-detail"><strong>Model:</strong> {{ $orderselectedSKU['model'] }}</div>
-                        <div class="product-detail"><strong>Color:</strong> {{ $orderselectedSKU['color'] }}</div>
-                        <div class="product-detail"><strong>Storage:</strong> {{ $orderselectedSKU['size'] }}</div>
+            <!-- Product Information -->
+                    <div class="section">
+                <h2 class="section-title">Item Details</h2>
+
+                @foreach ($order['items'] as $item)
+                    <div class="product-card">
+                        <div class="product-details">
+                            <div class="product-detail"><strong>Item Description:</strong> {{ $item['item_description'] }}</div>
+                            <div class="product-detail"><strong>Qty:</strong> {{ $item['qty'] }}</div>
+                        </div>
                     </div>
-                    <div class="product-price">${{ number_format($orderselectedSKU['price'], 2) }}</div>
-                </div>
-            </div> --}}
+                @endforeach
+            </div>
+
             
             <!-- Financial Summary -->
             <div class="section">
@@ -414,7 +414,7 @@
             
             <p style="font-size: 16px; color: #374151; margin: 10px 0 0 0;">
                 Best regards,<br>
-                <strong>The Sales Team</strong>
+                <strong>Beyond the Box</strong>
             </p>
         </div>
         

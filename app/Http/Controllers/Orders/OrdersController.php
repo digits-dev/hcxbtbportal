@@ -147,11 +147,19 @@ class OrdersController extends Controller
                 'created_at'  => now(),
             ];
            self::reserveItem($orderId, $item['digits_code'], $item['quantity']);
+         
         }
         OrderLines::insert($lines);
 
         // Prepare and send email
         $encryptedId = Crypt::encryptString($orderId);
+
+        // add items for sending order confirmation
+        $orderData['items'] = OrderLines::join('item_masters', 'item_masters.digits_code', '=', 'order_lines.digits_code')
+            ->where('order_lines.order_id', $orderId)
+            ->select('item_masters.item_description', 'order_lines.qty')
+            ->get()
+            ->toArray();
 
         if ($validatedData['has_downpayment'] === 'yes') {
             // Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
