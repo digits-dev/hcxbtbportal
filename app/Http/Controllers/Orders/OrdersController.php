@@ -260,10 +260,17 @@ class OrdersController extends Controller
 
     public function updateSave(Request $request) {
         
-        $order = Orders::where('id', $request->order_id)->first();
-        
-        if ($order->status == Statuses::FOR_VERIFICATION) {
+        try {
+
+            DB::beginTransaction();
             
+            $order = Orders::where('id', $request->order_id)->first();
+            if (!$order){
+                  return back()->with(['message' => 'Order not Found', 'type' => 'error']);
+            }
+        
+            if ($order->status == Statuses::FOR_VERIFICATION) {
+                
                 $existingRejectedProofs = $order->rejected_payment_proof
                     ? explode(',', $order->rejected_payment_proof)
                     : [];
@@ -271,7 +278,7 @@ class OrdersController extends Controller
                 if ($order->payment_proof) {
                     $existingRejectedProofs[] = $order->payment_proof;
                 }
-                
+                    
                 if ($request->action == 'reject') {
 
                     Orders::where('id', $request->order_id)->update([
@@ -288,19 +295,23 @@ class OrdersController extends Controller
                         'customer_name' => $order->first_name." ".$order->last_name,
                         'payment_link' => url('/upload/' . $encryptedId),
                     ]));
+
+                    DB::commit();
+                    return redirect('/orders')->with(['message' => 'Order has been Rejected', 'type' => 'success']);
+
                 }else {
 
                     $request->validate([
-                         'dp_receipt'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
+                        'dp_receipt'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
                     ]);
                     
-                     $timestamp = now()->timestamp;
+                    $timestamp = now()->timestamp;
                         if ($request->hasFile('dp_receipt')) {
                             $file = $request->file('dp_receipt');
                             $filename = $timestamp . '_' . $file->getClientOriginalName();
                             $file->move(public_path('dp-receipt/uploaded-receipt'), $filename);
                         }
-                  
+                
                     Orders::where('id', $request->order_id)->update([
                         'status' => Statuses::CONFIRMED,
                         'dp_receipt' => $filename,
@@ -317,42 +328,64 @@ class OrdersController extends Controller
 
                     Mail::to($order->email_address)->send(new OrderConfirmationMail($orderData));
 
-                     self::createDemTransaction($order->id);
+                    self::createDemTransaction($order->id);
+
+                    DB::commit();
+                    return redirect('/orders')->with(['message' => 'Order Approve Success', 'type' => 'success']);
 
                 }
-        }else if ($order->status == Statuses::FOR_SCHEDULE) {
 
-            Orders::where('id', $request->order_id)->update([
+            }else if ($order->status == Statuses::FOR_SCHEDULE) {
+
+                $request->validate([
+                    'schedule_date'     => 'required|date',
+                    'transaction_type'  => 'required|in:logistics,hand carry',
+                    'carrier_name' => 'required_if:transaction_type,hand carry'
+                ]);
+
+                Orders::where('id', $request->order_id)->update([
                     'status' => Statuses::FOR_DELIVERY,
                     'schedule_date' => $request->schedule_date,
                     'transaction_type' => $request->transaction_type,
                     'scheduled_by_logistics' => CommonHelpers::myId(),
                     'scheduled_at_logistics' => now(),
                 ]);
-                
-        }else if ($order->status == Statuses::FOR_DELIVERY)
-        {
-            self::approveReservation($order->id);
-            $request->validate([
-                         'proof_of_delivery'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
-                    ]);
 
-            $timestamp = now()->timestamp;
-                if ($request->hasFile('proof_of_delivery')) {
-                    $file = $request->file('proof_of_delivery');
-                    $filename = $timestamp . '_' . $file->getClientOriginalName();
-                    $file->move(public_path('delivery/proof_of_delivery'), $filename);
-                }        
-            Orders::where('id', $request->order_id)->update([
-                    'status' => Statuses::TO_CLOSE,
-                    'proof_of_delivery' => $filename,
-                    'scheduled_by_logistics' => CommonHelpers::myId(),
-                    'scheduled_at_logistics' => now(),
+                DB::commit();
+                return redirect('/orders')->with(['message' => 'Order Schedule Successful', 'type' => 'success']);
+                    
+            }else if ($order->status == Statuses::FOR_DELIVERY)
+            {
+                self::approveReservation($order->id);
+                $request->validate([
+                            'proof_of_delivery'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
+                        ]);
+
+                $timestamp = now()->timestamp;
+                    if ($request->hasFile('proof_of_delivery')) {
+                        $file = $request->file('proof_of_delivery');
+                        $filename = $timestamp . '_' . $file->getClientOriginalName();
+                        $file->move(public_path('delivery/proof_of_delivery'), $filename);
+                    }        
+                Orders::where('id', $request->order_id)->update([
+                        'status' => Statuses::TO_CLOSE,
+                        'proof_of_delivery' => $filename,
+                        'scheduled_by_logistics' => CommonHelpers::myId(),
+                        'scheduled_at_logistics' => now(),
                 ]);
-                
+
+                DB::commit();
+                return redirect('/orders')->with(['message' => 'Order Delivery Success', 'type' => 'success']);
+                    
+            }
+           
         }
-            
-      return redirect('/orders');
+        catch (\Exception $e) {
+            DB::rollback();
+            CommonHelpers::LogSystemError('Orders', $e->getMessage());
+            return back()->with(['message' => 'Order transaction failed', 'type' => 'error']);
+        }
+        
     }
 
     public function approveReservation($orderId)

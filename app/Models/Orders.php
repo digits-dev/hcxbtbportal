@@ -64,26 +64,13 @@ class Orders extends Model
         'updated_at',
     ];
 
-     public function scopeSearchAndFilter($query, $request){
+    public function scopeSearchAndFilter($query, $request){
 
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($query) use ($search) {
                 foreach ($this->filterable as $field) {
-                    if ($field === 'created_by') {
-                        $query->orWhereHas('getCreatedBy', function ($query) use ($search) {
-                            $query->where('name', 'LIKE', "%$search%");
-                        });
-                    }
-                    else if ($field === 'status') {
-                        $query->orWhere($field, '=', $search);
-                    }
-                    elseif ($field === 'updated_by')  {
-                        $query->orWhereHas('getUpdatedBy', function ($query) use ($search) {
-                            $query->where('name', 'LIKE', "%$search%");
-                        });
-                    } 
-                    elseif (in_array($field, ['created_at', 'updated_at'])) {
+                    if (in_array($field, ['created_at', 'updated_at'])) {
                         $query->orWhereDate($field, $search);
                     }
                     else {
@@ -94,14 +81,51 @@ class Orders extends Model
         }
 
         foreach ($this->filterable as $field) {
+
             if ($request->filled($field)) {
-                $value = $request->input($field);
-                if ($field === 'status') {
-                    $query->where($field, '=', $value);
+                   if ($request->filled($field)) {
+                    $data = $request->input($field);
+                    $operator = $data['operator'] ?? '=';
+                    $sorting = strtolower($data['sorting'] ?? '') === 'ascending' ? 'asc' : 'desc';
+                    $value = $data['value'] ?? null;
+
+                   switch ($operator) {
+                        case 'Empty (or Null)':
+                            $query->whereNull($field);
+                            break;
+    
+                        case 'NOT IN':
+                            $query->whereNotIn($field, is_array($value) ? $value : explode(',', $value));
+                            break;
+    
+                        case 'IN':
+                            $query->whereIn($field, is_array($value) ? $value : explode(',', $value));
+                            break;
+    
+                        case '!= (Not Equal to)':
+                            $query->where($field, '!=', $value);
+                            break;
+    
+                        case '= (Equal to)':
+                            $query->where($field, '=', $value);
+                            break;
+    
+                        case 'NOT LIKE':
+                            $query->where($field, 'NOT LIKE', "%$value%");
+                            break;
+    
+                        case 'LIKE':
+                        default:
+                            $query->where($field, 'LIKE', "%$value%");
+                            break;
+                    }
+
+                // Optional sorting logic
+                if (!empty($data['sorting'])) {
+                    $query->orderBy($field, $sorting);
                 }
-                else{
-                    $query->where($field, 'LIKE', "%$value%");
-                }
+
+            }
             }
         }
     

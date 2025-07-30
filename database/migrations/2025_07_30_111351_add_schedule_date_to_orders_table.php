@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
            $table->dateTime('schedule_date')->nullable()->after('dp_receipt');
            $table->string('transaction_type', 50)->nullable()->after('schedule_date');
+           $table->string('carrier_name', 100)->nullable()->after('transaction_type');
         });
     }
 
