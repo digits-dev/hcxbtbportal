@@ -183,10 +183,10 @@ class OrdersController extends Controller
                 ->select('item_masters.item_description', 'order_lines.qty')
                 ->get()
                 ->toArray();
-
+ 
             if ($validatedData['has_downpayment'] === 'yes') {
                 Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
-                    'customer_name' => $validatedData['customer_name'],
+                    'customer_name' => $validatedData['first_name'] . " " .$validatedData['last_name'],
                     'payment_link'  => url('/upload/' . $encryptedId),
                 ]));
             } else {
@@ -412,7 +412,7 @@ class OrdersController extends Controller
             'platform_name_id'         => 37,
             'billing_email'            => $headerDatas->email_address,
             'billing_phone'            => $headerDatas->contact_details,
-            'complete_billing_address' => $headerDatas->delivery_address,
+            'shipping_address_line1'   => $headerDatas->delivery_address,
             'shipping_first_name'      => $headerDatas->first_name,
             'shipping_last_name'       => $headerDatas->last_name,
             'billing_full_name'        => $headerDatas->first_name ." ". $headerDatas->last_name,

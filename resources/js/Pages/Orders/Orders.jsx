@@ -77,16 +77,17 @@ const Orders = ({page_title, queryParams, orders}) => {
                         <CustomFilter>
                             <Filters filter_inputs={[
                                 {name: 'Reference Number', column: 'reference_number'},
-                                {name: 'Customer Name', column: 'item_description'},
-                                {name: 'Delivery Address', column: 'model'},
-                                {name: 'Email Address', column: 'actual_color'},
-                                {name: 'Contact Details', column: 'size_value'},
-                                {name: 'Downpayment', column: 'created_at'},
-                                {name: 'Downpayment Value', column: 'updated_at'},
-                                {name: 'Financed Amount', column: 'updated_at'},
-                                {name: 'Created By', column: 'updated_at'},
-                                {name: 'Updated By', column: 'updated_at'},
-                                {name: 'Created Date', column: 'updated_at'},
+                                {name: 'First Name', column: 'first_name'},
+                                {name: 'Last Name', column: 'last_name'},
+                                {name: 'Delivery Address', column: 'delivery_address'},
+                                {name: 'Email Address', column: 'email_address'},
+                                {name: 'Contact Details', column: 'contact_details'},
+                                {name: 'Downpayment', column: 'has_downpayment'},
+                                {name: 'Downpayment Value', column: 'downpayment_value'},
+                                {name: 'Financed Amount', column: 'financed_amount'},
+                                {name: 'Created By', column: 'created_by'},
+                                {name: 'Updated By', column: 'updated_by'},
+                                {name: 'Created Date', column: 'created_at'},
                                 {name: 'Updated Date', column: 'updated_at'},
                             ]}/>
                         </CustomFilter>
@@ -223,7 +224,7 @@ const Orders = ({page_title, queryParams, orders}) => {
                                         {item.reference_number ?? '-'}
                                     </RowData>
                                     <RowData>
-                                        {item.customer_name ?? '-'}
+                                        {`${item.first_name} ${item.last_name}`  ?? '-'}
                                     </RowData>
                                     <RowData>
                                         {item.delivery_address ?? '-'}

@@ -316,7 +316,7 @@
         <div class="content">
             <!-- Greeting -->
             <p style="font-size: 16px; color: #374151; margin: 0 0 20px 0;">
-                Dear {{ $order['customer_name'] }},
+                Dear {{ $order['first_name'] ." ". $order['last_name'] }},
             </p>
             
             <p style="font-size: 16px; color: #374151; line-height: 1.6; margin: 0 0 20px 0;">
@@ -344,7 +344,7 @@
                 <div class="info-grid">
                     <div class="info-row">
                         <div class="info-label">Name:</div>
-                        <div class="info-value">{{ $order['customer_name'] }}</div>
+                        <div class="info-value">{{ $order['first_name'] ." ". $order['last_name'] }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Email:</div>
