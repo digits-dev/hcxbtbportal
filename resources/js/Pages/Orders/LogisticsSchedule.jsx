@@ -1,25 +1,16 @@
 import { Head, useForm } from "@inertiajs/react";
 import ContentPanel from "../../Components/Table/ContentPanel";
-import { useState } from "react";
 import { Check, X } from "lucide-react";
+import { useState } from "react";
 
-const AccoutingVerification = ({ page_title, order, lines }) => {
-    const [uploadedFile, setUploadedFile] = useState(null);
+const LogisticsSchedule = ({ page_title, order, lines }) => {
+    const [transactionType, setTransactionType] = useState("");
 
     const { data, setData, post, processing, errors, reset } = useForm({
         order_id: order.id,
-        dp_receipt: "",
-        action: "",
+        schedule_date: "",
+        transaction_type: "",
     });
-
-    const handleFileUpload = (e) => {
-        console.log(data);
-        const file = e.target.files?.[0];
-        if (file) {
-            setUploadedFile(file);
-        }
-        setData("dp_receipt", file);
-    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -309,252 +300,85 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                             </div>
                                         </div>
                                     )}
-                                    {order.rejected_payment_proof &&
-                                        (() => {
-                                            const images =
-                                                order.rejected_payment_proof
-                                                    .split(",")
-                                                    .map((f) => f.trim());
-                                            const isSingleImage =
-                                                images.length === 1;
 
-                                            return (
-                                                <div className="bg-red-50 p-4 rounded-lg">
-                                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                                        Rejected Proof of
-                                                        Payment
-                                                    </h3>
-                                                    <div
-                                                        className={
-                                                            isSingleImage
-                                                                ? ""
-                                                                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
-                                                        }
-                                                    >
-                                                        {images.map(
-                                                            (
-                                                                filename,
-                                                                index
-                                                            ) => {
-                                                                const displayName =
-                                                                    filename.substring(
-                                                                        filename.lastIndexOf(
-                                                                            "_"
-                                                                        ) + 1
-                                                                    );
-                                                                const fileUrl = `/payment/uploaded-payment_proof/${filename}`;
-                                                                return (
-                                                                    <div
-                                                                        key={
-                                                                            index
-                                                                        }
-                                                                        className={`bg-white border border-gray-200 rounded-lg p-4 ${
-                                                                            isSingleImage
-                                                                                ? "max-w-3xl mx-auto"
-                                                                                : ""
-                                                                        }`}
-                                                                    >
-                                                                        <img
-                                                                            src={
-                                                                                fileUrl
-                                                                            }
-                                                                            alt={`Payment Proof ${
-                                                                                index +
-                                                                                1
-                                                                            }`}
-                                                                            className={`rounded shadow-sm ${
-                                                                                isSingleImage
-                                                                                    ? "w-full h-auto"
-                                                                                    : "w-full h-48 object-contain"
-                                                                            }`}
-                                                                        />
-                                                                        <div
-                                                                            className="mt-2 text-sm text-gray-600 text-center truncate"
-                                                                            title={
-                                                                                displayName
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                displayName
-                                                                            }
-                                                                        </div>
-                                                                        <div className="mt-2 text-center">
-                                                                            <a
-                                                                                href={
-                                                                                    fileUrl
-                                                                                }
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
-                                                                                className="inline-block px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
-                                                                            >
-                                                                                View
-                                                                            </a>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            }
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
-
-                                    {order.payment_proof &&
-                                        (() => {
-                                            const images = order.payment_proof
-                                                .split(",")
-                                                .map((f) => f.trim());
-                                            const isSingleImage =
-                                                images.length === 1;
-
-                                            return (
-                                                <div className="bg-green-50 p-4 rounded-lg">
-                                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                                        Proof of Payment
-                                                    </h3>
-                                                    <div
-                                                        className={
-                                                            isSingleImage
-                                                                ? ""
-                                                                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
-                                                        }
-                                                    >
-                                                        {images.map(
-                                                            (
-                                                                filename,
-                                                                index
-                                                            ) => {
-                                                                const displayName =
-                                                                    filename.substring(
-                                                                        filename.lastIndexOf(
-                                                                            "_"
-                                                                        ) + 1
-                                                                    );
-                                                                const fileUrl = `/payment/uploaded-payment_proof/${filename}`;
-                                                                return (
-                                                                    <div
-                                                                        key={
-                                                                            index
-                                                                        }
-                                                                        className={`bg-white border border-gray-200 rounded-lg p-4 ${
-                                                                            isSingleImage
-                                                                                ? "max-w-3xl mx-auto"
-                                                                                : ""
-                                                                        }`}
-                                                                    >
-                                                                        <img
-                                                                            src={
-                                                                                fileUrl
-                                                                            }
-                                                                            alt={`Payment Proof ${
-                                                                                index +
-                                                                                1
-                                                                            }`}
-                                                                            className={`rounded shadow-sm ${
-                                                                                isSingleImage
-                                                                                    ? "w-full h-auto"
-                                                                                    : "w-full h-48 object-contain"
-                                                                            }`}
-                                                                        />
-                                                                        <div
-                                                                            className="mt-2 text-sm text-gray-600 text-center truncate"
-                                                                            title={
-                                                                                displayName
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                displayName
-                                                                            }
-                                                                        </div>
-                                                                        <div className="mt-2 text-center">
-                                                                            <a
-                                                                                href={
-                                                                                    fileUrl
-                                                                                }
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
-                                                                                className="inline-block px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
-                                                                            >
-                                                                                View
-                                                                            </a>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            }
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
-
-                                    {/* Upload of Downpayment Receipt */}
+                                    {/* Schedule Date */}
                                     <div className="space-y-2">
                                         <label
-                                            htmlFor="dp_receipt"
+                                            htmlFor="schedule_date"
                                             className="block text-sm font-medium text-gray-700"
                                         >
-                                            Upload of Downpayment Receipt
+                                            Schedule Date
                                         </label>
-                                        <div className="border-2 border-dashed border-gray-400 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer">
-                                            <input
-                                                id="dp_receipt"
-                                                name="dp_receipt"
-                                                type="file"
-                                                accept=".jpg,.jpeg,.png"
-                                                onChange={handleFileUpload}
-                                                className="hidden"
-                                            />
-                                            <label
-                                                htmlFor="dp_receipt"
-                                                className="cursor-pointer flex flex-col items-center gap-2"
-                                            >
-                                                {uploadedFile ? (
-                                                    <>
-                                                        <svg
-                                                            className="h-8 w-8 text-green-600"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                            />
-                                                        </svg>
-                                                        <span className="text-sm font-medium text-green-600">
-                                                            {uploadedFile.name}
-                                                        </span>
-                                                        <span className="text-xs text-gray-500">
-                                                            Click to change file
-                                                        </span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <svg
-                                                            className="h-8 w-8 text-gray-400"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                                                            />
-                                                        </svg>
-                                                        <span className="text-sm font-medium text-gray-700">
-                                                            Click to upload
-                                                            Downpayment Receipt
-                                                        </span>
-                                                        <span className="text-xs text-gray-500">
-                                                            JPG, PNG up to 10MB
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </label>
+                                        <input
+                                            id="schedule_date"
+                                            name="schedule_date"
+                                            type="date"
+                                            required
+                                            value={data.schedule_date}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "schedule_date",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        />
+                                    </div>
+
+                                    {/* Transaction Type */}
+                                    <div className="space-y-3">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Transaction Type
+                                        </label>
+                                        <div className="flex gap-6">
+                                            <div className="flex items-center space-x-2">
+                                                <input
+                                                    type="radio"
+                                                    name="transaction_type"
+                                                    value="handcarry"
+                                                    checked={
+                                                        data.transaction_type ===
+                                                        "handcarry"
+                                                    }
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            "transaction_type",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                                />
+                                                <label
+                                                    htmlFor="transaction-handcarry"
+                                                    className="text-sm text-gray-700"
+                                                >
+                                                    Handcarry
+                                                </label>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <input
+                                                    type="radio"
+                                                    name="transaction_type"
+                                                    value="thirdparty"
+                                                    checked={
+                                                        data.transaction_type ===
+                                                        "thirdparty"
+                                                    }
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            "transaction_type",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                                />
+                                                <label
+                                                    htmlFor="transaction-thirdparty"
+                                                    className="text-sm text-gray-700"
+                                                >
+                                                    Third Party
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -570,26 +394,13 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                         >
                                             Back
                                         </button>
-                                        <div className="flex gap-3">
-                                            <button
-                                                type="submit"
-                                                onClick={() =>
-                                                    setData("action", "reject")
-                                                }
-                                                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:brightness-90"
-                                            >
-                                                Reject
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                onClick={() =>
-                                                    setData("action", "approve")
-                                                }
-                                                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:brightness-90"
-                                            >
-                                                Approve
-                                            </button>
-                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:brightness-90"
+                                        >
+                                            Approve
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -601,4 +412,4 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
     );
 };
 
-export default AccoutingVerification;
+export default LogisticsSchedule;

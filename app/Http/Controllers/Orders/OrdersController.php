@@ -7,7 +7,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Orders;
 use App\Models\OrderLines;
 use App\Models\ItemMaster;
+use App\Models\ItemReservation;
+use App\Models\ItemInventory;
 use App\Models\Statuses;
+use App\Models\AdmModels\AdmPrivileges;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +38,13 @@ class OrdersController extends Controller
     }
 
     public function getAllData(){
-        $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy']);
+        if (CommonHelpers::myPrivilegeId() == AdmPrivileges::ACCOUNTING) {
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy'])->whereIn('status',[Statuses::FOR_VERIFICATION]);
+        }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::LOGISTICS){
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy'])->whereIn('status',[Statuses::FOR_SCHEDULE]);
+        }else {
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy']);
+        }
         $filter = $query->searchAndFilter(request());
         $result = $filter->orderBy($this->sortBy, $this->sortDir);
         return $result;
@@ -60,7 +69,11 @@ class OrdersController extends Controller
         $data = [];
         $data['page_title'] = 'Create Order';
         $data['sku'] = DB::table('item_masters')
-        ->select('digits_code', 'item_description', 'model','actual_color', 'size' )->get();
+            ->leftJoin('item_inventories', 'item_inventories.digits_code', '=', 'item_masters.digits_code')
+            ->where('item_inventories.qty', '>', 1)
+            ->select('item_masters.digits_code', 'item_description', 'model', 'actual_color', 'size')
+            ->get();
+
  
         return Inertia::render("Orders/CreateOrderForm", $data);
     }
@@ -83,12 +96,12 @@ class OrdersController extends Controller
         ]);
 
         // Check DEM DB connection first
-        try {
-            DB::connection('dem')->getPdo(); // Try connecting
-        } catch (\Exception $e) {
-            Log::error('DEM DB connection failed: ' . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => 'Unable to connect to the DEM database. Please try again later.']);
-        }
+        // try {
+        //     DB::connection('dem')->getPdo(); // Try connecting
+        // } catch (\Exception $e) {
+        //     Log::error('DEM DB connection failed: ' . $e->getMessage());
+        //     return redirect()->back()->withErrors(['error' => 'Unable to connect to the DEM database. Please try again later.']);
+        // }
 
         $timestamp = now()->timestamp;
 
@@ -133,6 +146,7 @@ class OrdersController extends Controller
                 'qty'         => $item['quantity'],
                 'created_at'  => now(),
             ];
+           self::reserveItem($orderId, $item['digits_code'], $item['quantity']);
         }
         OrderLines::insert($lines);
 
@@ -140,17 +154,40 @@ class OrdersController extends Controller
         $encryptedId = Crypt::encryptString($orderId);
 
         if ($validatedData['has_downpayment'] === 'yes') {
-            Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
-                'customer_name' => $validatedData['customer_name'],
-                'payment_link'  => url('/upload/' . $encryptedId),
-            ]));
+            // Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
+            //     'customer_name' => $validatedData['customer_name'],
+            //     'payment_link'  => url('/upload/' . $encryptedId),
+            // ]));
         } else {
-            Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
-            self::createDemTransaction($orderId);
+            // Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
+            // self::createDemTransaction($orderId);
         }
 
         return redirect('/orders');
     }
+
+    public function reserveItem($orderId, $digits_code, $quantity)
+    {
+        $item = ItemInventory::where('digits_code', $digits_code)->firstOrFail();
+        $availableQty = $item->qty - $item->reserved_qty;
+
+        // if ($quantity > $availableQty) {
+        //     throw new \Exception("Not enough stock for item: $digits_code");
+        // }
+
+        // Reserve the quantity
+        $item->reserved_qty += $quantity;
+        $item->save();
+
+        // Record the reservation
+        ItemReservation::create([
+            'order_id'     => $orderId,
+            'digits_code'  => $digits_code,
+            'quantity'     => $quantity,
+            'status'       => 'reserved',
+        ]);
+    }
+
 
     public function view ($id) {
         $data = [];
@@ -158,6 +195,7 @@ class OrdersController extends Controller
         $data['order'] = Orders::where('id',$id)->first();
         $data['lines'] = OrderLines::leftJoin('item_masters', 'item_masters.digits_code', 'order_lines.digits_code')
         ->where('order_id', $id)->get();
+        $data['my_privilege_id'] = CommonHelpers::myPrivilegeId();
  
         return Inertia::render("Orders/ViewOrderDetails", $data);
     } 
@@ -169,52 +207,73 @@ class OrdersController extends Controller
         $data['lines'] = OrderLines::leftJoin('item_masters', 'item_masters.digits_code', 'order_lines.digits_code')
         ->where('order_id', $id)->get();
  
-        return Inertia::render("Orders/AccountingVerification", $data);
-    }
+        if(CommonHelpers::myPrivilegeId() == AdmPrivileges::ACCOUNTING) {
+            return Inertia::render("Orders/AccountingVerification", $data);
+        }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::LOGISTICS){
+            return Inertia::render("Orders/LogisticsSchedule", $data);
+            }
+        }
+        
 
     public function updateSave(Request $request) {
-        $timestamp = now()->timestamp;
-        if ($request->hasFile('dp_receipt')) {
-            $file = $request->file('dp_receipt');
-            $filename = $timestamp . '_' . $file->getClientOriginalName();
-            $file->move(public_path('dp-receipt/uploaded-receipt'), $filename);
-        }
-    
+        
         $order = Orders::where('id', $request->order_id)->first();
-
- 
-        $encryptedId = Crypt::encryptString($order->id);
         
-        $existingRejectedProofs = $order->rejected_payment_proof
-            ? explode(',', $order->rejected_payment_proof)
-            : [];
+        if ($order->status == Statuses::FOR_VERIFICATION) {
+            
+                $timestamp = now()->timestamp;
+                if ($request->hasFile('dp_receipt')) {
+                    $file = $request->file('dp_receipt');
+                    $filename = $timestamp . '_' . $file->getClientOriginalName();
+                    $file->move(public_path('dp-receipt/uploaded-receipt'), $filename);
+                }
+            
+                $encryptedId = Crypt::encryptString($order->id);
+                
+                $existingRejectedProofs = $order->rejected_payment_proof
+                    ? explode(',', $order->rejected_payment_proof)
+                    : [];
 
-        if ($order->payment_proof) {
-            $existingRejectedProofs[] = $order->payment_proof;
+                if ($order->payment_proof) {
+                    $existingRejectedProofs[] = $order->payment_proof;
+                }
+
+                
+                if ($request->action == 'reject') {
+                    Orders::where('id', $request->order_id)->update([
+                        'status' => Statuses::REJECTED,
+                        'rejected_payment_proof' => implode(',', $existingRejectedProofs),
+                        'payment_proof' => null,
+                        'rejected_by' => CommonHelpers::myId(),
+                        'rejected_at' => now(),
+                    ]);
+
+                    // Mail::to($order->email_address)->send(new ReSendProofOfPaymentLink([
+                    //     'customer_name' => $order->customer_name,
+                    //     'payment_link' => url('/upload/' . $encryptedId),
+                    // ]));
+                }else {
+                    Orders::where('id', $request->order_id)->update([
+                        'status' => Statuses::CONFIRMED,
+                        'dp_receipt' => $filename,
+                        'verified_by_acctg' => CommonHelpers::myId(),
+                        'verified_at_acctg' => now(),
+                    ]);
+
+                    //  self::createDemTransaction($order->id);
+
+                }
+        }else if ($order->status == Statuses::FOR_SCHEDULE) {
+
+               Orders::where('id', $request->order_id)->update([
+                        'status' => Statuses::FOR_DELIVERY,
+                        'schedule_date' => $request->schedule_date,
+                        'transaction_type' => $request->transaction_type,
+                        'scheduled_by_logistics' => CommonHelpers::myId(),
+                        'scheduled_at_logistics' => now(),
+                    ]);
         }
-
-        
-        if ($request->action == 'reject') {
-            Orders::where('id', $request->order_id)->update([
-                'status' => Statuses::REJECTED,
-                'rejected_payment_proof' => implode(',', $existingRejectedProofs),
-                'payment_proof' => null,
-                'rejected_by' => CommonHelpers::myId(),
-                'rejected_at' => now(),
-            ]);
-
-            // Mail::to($order->email_address)->send(new ReSendProofOfPaymentLink([
-            //     'customer_name' => $order->customer_name,
-            //     'payment_link' => url('/upload/' . $encryptedId),
-            // ]));
-        }else {
-            Orders::where('id', $request->order_id)->update([
-                'status' => Statuses::CONFIRMED,
-                'dp_receipt' => $filename,
-                'verified_by_acctg' => CommonHelpers::myId(),
-                'verified_at_acctg' => now(),
-            ]);
-        }
+     
             
       return redirect('/orders');
     }
@@ -280,22 +339,22 @@ class OrdersController extends Controller
             'billing_email'            => $headerDatas->email_address,
             'billing_phone'            => $headerDatas->contact_details,
             'complete_billing_address' => $headerDatas->delivery_address,
-            'items_subtotal'           => $headerDatas->items_subtotal,
-            'order_total'              => $headerDatas->order_total,
-            'total_quantity'           => $headerDatas->total_quantity,
+            // 'items_subtotal'           => $headerDatas->items_subtotal,
+            // 'order_total'              => $headerDatas->order_total,
+            // 'total_quantity'           => $headerDatas->total_quantity,
             'created_by'               => 1000, //DEM Creator
 		    'created_at'               => date('Y-m-d H:i:s')
         ]);
 
         foreach($orderLinesDatas ?? [] as $key => $val){
-            $items = DB::connection('dem')->table('product')->where('digits_code',$val->digits_code)->first() ?? NULL;
+            $items = DB::connection('dem')->table('products')->where('digits_code',$val->digits_code)->first() ?? NULL;
             DB::connection('dem')->table('order_body')->insert([
                 'items_id'         => $dem_order_id . $items->id,
                 'header_id'        => $dem_order_id,
                 'item_id'          => $items->id,
                 'sku'              => $items->digits_code ?? $val->digits_code,
                 'item_description' => $items->item_description,
-                'cost'             => $items->price ?? $val->item_cost,
+                // 'cost'             => $items->price ?? $val->item_cost,
                 'quantity'         => $val->qty
             ]);
         }
