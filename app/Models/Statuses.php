@@ -15,6 +15,7 @@ class Statuses extends Model
     public const REJECTED = 4;
     public const FOR_SCHEDULE = 5;
     public const FOR_DELIVERY = 6;
+    public const TO_CLOSE = 7;
 
     protected $fillable = [
         'id',

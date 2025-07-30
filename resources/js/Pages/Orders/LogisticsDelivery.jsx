@@ -1,46 +1,36 @@
 import { Head, useForm } from "@inertiajs/react";
 import ContentPanel from "../../Components/Table/ContentPanel";
-import { useState } from "react";
 import { Check, X } from "lucide-react";
 import LoginInputTooltip from "../../Components/Tooltip/LoginInputTooltip";
-import { useTheme } from "../../Context/ThemeContext";
-import useThemeStyles from "../../Hooks/useThemeStyles";
+import { useState } from "react";
 
-const AccoutingVerification = ({ page_title, order, lines }) => {
-    const { theme } = useTheme();
-    const { primayActiveColor, textColorActive, buttonSwalColor } =
-        useThemeStyles(theme);
+const LogisticsDelivery = ({ page_title, order, lines }) => {
     const [uploadedFile, setUploadedFile] = useState(null);
-
+    const [previewUrl, setPreviewUrl] = useState(null);
     const { data, setData, post, processing, errors, reset } = useForm({
         order_id: order.id,
-        dp_receipt: "",
-        action: "",
+        proof_of_delivery: "",
     });
 
     const handleFileUpload = (e) => {
         const file = e.target.files?.[0];
         if (file) {
             setUploadedFile(file);
+            setPreviewUrl(URL.createObjectURL(file)); // generate preview URL
         }
-        setData("dp_receipt", file);
+        setData("proof_of_delivery", file);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         Swal.fire({
-            title: `<p class="font-nunito-sans" >Are you sure that you want to ${
-                data.action == "approve" ? "approve" : "reject"
-            } this?</p>`,
+            title: `<p class="font-nunito-sans" >Are you sure that you want to proceed?</p>`,
             showCancelButton: true,
-            confirmButtonText: `${
-                data.action == "approve" ? "Approve" : "Reject"
-            } Order`,
-            confirmButtonColor: `${
-                data.action == "approve" ? "#05df72" : "#fb2c36"
-            }`,
+            confirmButtonText: "Confirm",
+            confirmButtonColor: "#201E43",
+            cancelButtonColor: "#134B70",
             icon: "question",
-            iconColor: buttonSwalColor,
+            iconColor: "#134B70",
             reverseButtons: true,
         }).then(async (result) => {
             if (result.isConfirmed) {
@@ -325,213 +315,78 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                             </div>
                                         </div>
                                     )}
-                                    {order.rejected_payment_proof &&
-                                        (() => {
-                                            const images =
-                                                order.rejected_payment_proof
-                                                    .split(",")
-                                                    .map((f) => f.trim());
-                                            const isSingleImage =
-                                                images.length === 1;
-
-                                            return (
-                                                <div className="bg-red-50 p-4 rounded-lg">
-                                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                                        Rejected Proof of
-                                                        Payment
-                                                    </h3>
-                                                    <div
-                                                        className={
-                                                            isSingleImage
-                                                                ? ""
-                                                                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+                                    {order.schedule_date && (
+                                        <div className="bg-gray-300 p-4 rounded-lg">
+                                            <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                                Schedule Information
+                                            </h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {/* Customer Name */}
+                                                <div className="space-y-1">
+                                                    <label className="block text-sm font-medium text-gray-700">
+                                                        Schedule Date
+                                                    </label>
+                                                    <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
+                                                        {
+                                                            new Date(
+                                                                order.schedule_date
+                                                            )
+                                                                .toISOString()
+                                                                .split("T")[0]
                                                         }
-                                                    >
-                                                        {images.map(
-                                                            (
-                                                                filename,
-                                                                index
-                                                            ) => {
-                                                                const displayName =
-                                                                    filename.substring(
-                                                                        filename.lastIndexOf(
-                                                                            "_"
-                                                                        ) + 1
-                                                                    );
-                                                                const fileUrl = `/payment/uploaded-payment_proof/${filename}`;
-                                                                return (
-                                                                    <div
-                                                                        key={
-                                                                            index
-                                                                        }
-                                                                        className={`bg-white border border-gray-200 rounded-lg p-4 ${
-                                                                            isSingleImage
-                                                                                ? "max-w-3xl mx-auto"
-                                                                                : ""
-                                                                        }`}
-                                                                    >
-                                                                        <img
-                                                                            src={
-                                                                                fileUrl
-                                                                            }
-                                                                            alt={`Payment Proof ${
-                                                                                index +
-                                                                                1
-                                                                            }`}
-                                                                            className={`rounded shadow-sm ${
-                                                                                isSingleImage
-                                                                                    ? "w-full h-auto"
-                                                                                    : "w-full h-48 object-contain"
-                                                                            }`}
-                                                                        />
-                                                                        <div
-                                                                            className="mt-2 text-sm text-gray-600 text-center truncate"
-                                                                            title={
-                                                                                displayName
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                displayName
-                                                                            }
-                                                                        </div>
-                                                                        <div className="mt-2 text-center">
-                                                                            <a
-                                                                                href={
-                                                                                    fileUrl
-                                                                                }
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
-                                                                                className="inline-block px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
-                                                                            >
-                                                                                View
-                                                                            </a>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            }
-                                                        )}
                                                     </div>
                                                 </div>
-                                            );
-                                        })()}
 
-                                    {order.payment_proof &&
-                                        (() => {
-                                            const images = order.payment_proof
-                                                .split(",")
-                                                .map((f) => f.trim());
-                                            const isSingleImage =
-                                                images.length === 1;
-
-                                            return (
-                                                <div className="bg-green-50 p-4 rounded-lg">
-                                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                                        Proof of Payment
-                                                    </h3>
-                                                    <div
-                                                        className={
-                                                            isSingleImage
-                                                                ? ""
-                                                                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
-                                                        }
-                                                    >
-                                                        {images.map(
-                                                            (
-                                                                filename,
-                                                                index
-                                                            ) => {
-                                                                const displayName =
-                                                                    filename.substring(
-                                                                        filename.lastIndexOf(
-                                                                            "_"
-                                                                        ) + 1
-                                                                    );
-                                                                const fileUrl = `/payment/uploaded-payment_proof/${filename}`;
-                                                                return (
-                                                                    <div
-                                                                        key={
-                                                                            index
-                                                                        }
-                                                                        className={`bg-white border border-gray-200 rounded-lg p-4 ${
-                                                                            isSingleImage
-                                                                                ? "max-w-3xl mx-auto"
-                                                                                : ""
-                                                                        }`}
-                                                                    >
-                                                                        <img
-                                                                            src={
-                                                                                fileUrl
-                                                                            }
-                                                                            alt={`Payment Proof ${
-                                                                                index +
-                                                                                1
-                                                                            }`}
-                                                                            className={`rounded shadow-sm ${
-                                                                                isSingleImage
-                                                                                    ? "w-full h-auto"
-                                                                                    : "w-full h-48 object-contain"
-                                                                            }`}
-                                                                        />
-                                                                        <div
-                                                                            className="mt-2 text-sm text-gray-600 text-center truncate"
-                                                                            title={
-                                                                                displayName
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                displayName
-                                                                            }
-                                                                        </div>
-                                                                        <div className="mt-2 text-center">
-                                                                            <a
-                                                                                href={
-                                                                                    fileUrl
-                                                                                }
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
-                                                                                className="inline-block px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
-                                                                            >
-                                                                                View
-                                                                            </a>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            }
-                                                        )}
+                                                {/* Email Address */}
+                                                <div className="space-y-1">
+                                                    <label className="block text-sm font-medium text-gray-700">
+                                                        Transaction Type
+                                                    </label>
+                                                    <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
+                                                        {order.transaction_type}
                                                     </div>
                                                 </div>
-                                            );
-                                        })()}
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Upload Downpayment Receipt */}
                                     <div className="space-y-2">
                                         <label
-                                            htmlFor="dp_receipt"
+                                            htmlFor="proof_of_delivery"
                                             className="block text-sm font-medium text-gray-700"
                                         >
-                                            Upload Downpayment Receipt
+                                            Upload Proof of Delivery
                                         </label>
                                         <div
                                             className={`relative border-2 ${
-                                                errors.dp_receipt
+                                                errors.proof_of_delivery
                                                     ? "border-red-500"
                                                     : "border-dashed border-gray-400 hover:border-gray-400"
                                             }  rounded-lg p-6 text-center  transition-colors cursor-pointer`}
                                         >
                                             <input
-                                                id="dp_receipt"
-                                                name="dp_receipt"
+                                                id="proof_of_delivery"
+                                                name="proof_of_delivery"
                                                 type="file"
                                                 accept=".jpg,.jpeg,.png"
                                                 onChange={handleFileUpload}
                                                 className="hidden"
                                             />
                                             <label
-                                                htmlFor="dp_receipt"
+                                                htmlFor="proof_of_delivery"
                                                 className="cursor-pointer flex flex-col items-center gap-2"
                                             >
                                                 {uploadedFile ? (
                                                     <>
+                                                        {" "}
+                                                        {previewUrl && (
+                                                            <img
+                                                                src={previewUrl}
+                                                                alt="Preview"
+                                                                className="mt-4 max-h-48 mx-auto rounded border"
+                                                            />
+                                                        )}
                                                         <svg
                                                             className="h-8 w-8 text-green-600"
                                                             fill="none"
@@ -568,8 +423,8 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                                             />
                                                         </svg>
                                                         <span className="text-sm font-medium text-gray-700">
-                                                            Click to upload
-                                                            Downpayment Receipt
+                                                            Click to Upload
+                                                            Proof of Delivery
                                                         </span>
                                                         <span className="text-xs text-gray-500">
                                                             JPG, PNG up to 10MB
@@ -577,9 +432,11 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                                     </>
                                                 )}
                                             </label>
-                                            {errors.dp_receipt && (
+                                            {errors.proof_of_delivery && (
                                                 <LoginInputTooltip
-                                                    content={errors.dp_receipt}
+                                                    content={
+                                                        errors.proof_of_delivery
+                                                    }
                                                 >
                                                     <i className="fa-solid fa-circle-info text-red-600 absolute cursor-pointer top-1/2 text-xs md:text-base right-1.5 md:right-3 transform -translate-y-1/2"></i>
                                                 </LoginInputTooltip>
@@ -599,26 +456,13 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                         >
                                             Back
                                         </button>
-                                        <div className="flex gap-3">
-                                            <button
-                                                type="submit"
-                                                onClick={() =>
-                                                    setData("action", "reject")
-                                                }
-                                                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:brightness-90"
-                                            >
-                                                Reject
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                onClick={() =>
-                                                    setData("action", "approve")
-                                                }
-                                                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:brightness-90"
-                                            >
-                                                Approve
-                                            </button>
-                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:brightness-90"
+                                        >
+                                            Deliver
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -630,4 +474,4 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
     );
 };
 
-export default AccoutingVerification;
+export default LogisticsDelivery;

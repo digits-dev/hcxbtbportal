@@ -41,7 +41,7 @@ class OrdersController extends Controller
         if (CommonHelpers::myPrivilegeId() == AdmPrivileges::ACCOUNTING) {
             $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy'])->whereIn('status',[Statuses::FOR_VERIFICATION]);
         }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::LOGISTICS){
-            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy'])->whereIn('status',[Statuses::FOR_SCHEDULE]);
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy'])->whereIn('status',[Statuses::FOR_SCHEDULE, Statuses::FOR_DELIVERY]);
         }else {
             $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy']);
         }
@@ -162,13 +162,13 @@ class OrdersController extends Controller
             ->toArray();
 
         if ($validatedData['has_downpayment'] === 'yes') {
-            // Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
-            //     'customer_name' => $validatedData['customer_name'],
-            //     'payment_link'  => url('/upload/' . $encryptedId),
-            // ]));
+            Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
+                'customer_name' => $validatedData['customer_name'],
+                'payment_link'  => url('/upload/' . $encryptedId),
+            ]));
         } else {
-            // Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
-            // self::createDemTransaction($orderId);
+            Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
+            self::createDemTransaction($orderId);
         }
 
         return redirect('/orders');
@@ -218,7 +218,11 @@ class OrdersController extends Controller
         if(CommonHelpers::myPrivilegeId() == AdmPrivileges::ACCOUNTING) {
             return Inertia::render("Orders/AccountingVerification", $data);
         }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::LOGISTICS){
-            return Inertia::render("Orders/LogisticsSchedule", $data);
+                if ($data['order']->status == Statuses::FOR_SCHEDULE) {
+                    return Inertia::render("Orders/LogisticsSchedule", $data);
+                }else {
+                    return Inertia::render("Orders/LogisticsDelivery", $data);
+                }
             }
         }
         
@@ -229,15 +233,6 @@ class OrdersController extends Controller
         
         if ($order->status == Statuses::FOR_VERIFICATION) {
             
-                $timestamp = now()->timestamp;
-                if ($request->hasFile('dp_receipt')) {
-                    $file = $request->file('dp_receipt');
-                    $filename = $timestamp . '_' . $file->getClientOriginalName();
-                    $file->move(public_path('dp-receipt/uploaded-receipt'), $filename);
-                }
-            
-                $encryptedId = Crypt::encryptString($order->id);
-                
                 $existingRejectedProofs = $order->rejected_payment_proof
                     ? explode(',', $order->rejected_payment_proof)
                     : [];
@@ -245,9 +240,9 @@ class OrdersController extends Controller
                 if ($order->payment_proof) {
                     $existingRejectedProofs[] = $order->payment_proof;
                 }
-
                 
                 if ($request->action == 'reject') {
+
                     Orders::where('id', $request->order_id)->update([
                         'status' => Statuses::REJECTED,
                         'rejected_payment_proof' => implode(',', $existingRejectedProofs),
@@ -256,11 +251,25 @@ class OrdersController extends Controller
                         'rejected_at' => now(),
                     ]);
 
+                    $encryptedId = Crypt::encryptString($order->id);
+
                     // Mail::to($order->email_address)->send(new ReSendProofOfPaymentLink([
                     //     'customer_name' => $order->customer_name,
                     //     'payment_link' => url('/upload/' . $encryptedId),
                     // ]));
                 }else {
+
+                    $request->validate([
+                         'dp_receipt'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
+                    ]);
+                    
+                     $timestamp = now()->timestamp;
+                        if ($request->hasFile('dp_receipt')) {
+                            $file = $request->file('dp_receipt');
+                            $filename = $timestamp . '_' . $file->getClientOriginalName();
+                            $file->move(public_path('dp-receipt/uploaded-receipt'), $filename);
+                        }
+                  
                     Orders::where('id', $request->order_id)->update([
                         'status' => Statuses::CONFIRMED,
                         'dp_receipt' => $filename,
@@ -268,20 +277,46 @@ class OrdersController extends Controller
                         'verified_at_acctg' => now(),
                     ]);
 
+                    $orderData = $order->toArray();
+                    $orderData['items'] = OrderLines::join('item_masters', 'item_masters.digits_code', '=', 'order_lines.digits_code')
+                                            ->where('order_lines.order_id', $order->id)
+                                            ->select('item_masters.item_description', 'order_lines.qty')
+                                            ->get()
+                                            ->toArray();
+
+                    Mail::to($order->email_address)->send(new OrderConfirmationMail($orderData));
+
                     //  self::createDemTransaction($order->id);
 
                 }
         }else if ($order->status == Statuses::FOR_SCHEDULE) {
 
-               Orders::where('id', $request->order_id)->update([
-                        'status' => Statuses::FOR_DELIVERY,
-                        'schedule_date' => $request->schedule_date,
-                        'transaction_type' => $request->transaction_type,
-                        'scheduled_by_logistics' => CommonHelpers::myId(),
-                        'scheduled_at_logistics' => now(),
+            Orders::where('id', $request->order_id)->update([
+                    'status' => Statuses::FOR_DELIVERY,
+                    'schedule_date' => $request->schedule_date,
+                    'transaction_type' => $request->transaction_type,
+                    'scheduled_by_logistics' => CommonHelpers::myId(),
+                    'scheduled_at_logistics' => now(),
+                ]);
+        }else if ($order->status == Statuses::FOR_DELIVERY)
+        {
+              $request->validate([
+                         'proof_of_delivery'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
                     ]);
+
+                $timestamp = now()->timestamp;
+                    if ($request->hasFile('proof_of_delivery')) {
+                        $file = $request->file('proof_of_delivery');
+                        $filename = $timestamp . '_' . $file->getClientOriginalName();
+                        $file->move(public_path('delivery/proof_of_delivery'), $filename);
+                    }        
+            Orders::where('id', $request->order_id)->update([
+                    'status' => Statuses::TO_CLOSE,
+                    'proof_of_delivery' => $filename,
+                    'scheduled_by_logistics' => CommonHelpers::myId(),
+                    'scheduled_at_logistics' => now(),
+                ]);
         }
-     
             
       return redirect('/orders');
     }

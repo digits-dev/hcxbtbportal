@@ -35,6 +35,7 @@
             color: #ffffff;
             text-decoration: none;
             border-radius: 5px;
+            text-decoration: none;
         }
         .footer {
             text-align: center;

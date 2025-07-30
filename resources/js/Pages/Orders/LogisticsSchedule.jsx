@@ -4,8 +4,6 @@ import { Check, X } from "lucide-react";
 import { useState } from "react";
 
 const LogisticsSchedule = ({ page_title, order, lines }) => {
-    const [transactionType, setTransactionType] = useState("");
-
     const { data, setData, post, processing, errors, reset } = useForm({
         order_id: order.id,
         schedule_date: "",
@@ -320,6 +318,11 @@ const LogisticsSchedule = ({ page_title, order, lines }) => {
                                             name="schedule_date"
                                             type="date"
                                             required
+                                            min={
+                                                new Date()
+                                                    .toISOString()
+                                                    .split("T")[0]
+                                            }
                                             value={data.schedule_date}
                                             onChange={(e) =>
                                                 setData(

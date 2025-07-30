@@ -329,7 +329,7 @@
                 <div class="info-grid">
                     <div class="info-row">
                         <div class="info-label">Order Date:</div>
-                        <div class="info-value">{{ \Carbon\Carbon::parse($order['order_date'])->format('F j, Y') }}</div>
+                      <div class="info-value">{{ \Carbon\Carbon::parse($order['order_date'] ?? $order['created_at'])->format('F j, Y') }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Status:</div>
@@ -365,14 +365,14 @@
                     <div class="section">
                 <h2 class="section-title">Item Details</h2>
 
-                @foreach ($order['items'] as $item)
-                    <div class="product-card">
+                <div class="product-card">
+                        @foreach ($order['items'] as $item)
                         <div class="product-details">
                             <div class="product-detail"><strong>Item Description:</strong> {{ $item['item_description'] }}</div>
                             <div class="product-detail"><strong>Qty:</strong> {{ $item['qty'] }}</div>
                         </div>
+                        @endforeach
                     </div>
-                @endforeach
             </div>
 
             
@@ -388,7 +388,7 @@
                     @if($order['has_downpayment'] == 'yes')
                     <div class="total-row">
                         <div class="total-label">Downpayment:</div>
-                        <div class="total-value">${{ number_format($order['downpayment_value'], 2) }}</div>
+                        <div class="total-value">{{ number_format($order['downpayment_value'], 2) }}</div>
                     </div>
                     @endif
                     
