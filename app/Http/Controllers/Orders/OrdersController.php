@@ -24,6 +24,7 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class OrdersController extends Controller
 {
@@ -83,95 +84,125 @@ class OrdersController extends Controller
     {
         // Validate request data
         $validatedData = $request->validate([
-            'customer_name'      => 'required|string|max:255',
+            'first_name'      => 'required|string|max:255',
+            'last_name'      => 'required|string|max:255',
             'delivery_address'   => 'required|string|max:255',
             'email_address'      => 'required|email|max:255',
-            'contact_details'    => 'required|string|max:50',
-            'financed_amount'    => 'required|numeric|min:0',
+            'contact_details' => [
+                'required',
+                'string',
+                'regex:/^\+639\d{9}$/'
+            ],
+            'downpayment_value' => [
+                'required_if:has_downpayment,yes',
+                Rule::when($request->has_downpayment === 'yes', [
+                    'decimal:0,2',
+                ])
+            ],
+            'financed_amount'    => 'required|decimal:0,2',
             'has_downpayment'    => 'required|in:yes,no',
-            'downpayment_value'  => 'nullable|numeric|min:0',
             'approved_contract'  => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'items'              => 'required|array|min:1',
 
+        ],[
+            'contact_details.required' => 'The contact number is required.',
+            'contact_details.regex' => 'The contact number must be a valid Philippine mobile number starting with +63.',
         ]);
 
         // Check DEM DB connection first
-        // try {
-        //     DB::connection('dem')->getPdo(); // Try connecting
-        // } catch (\Exception $e) {
-        //     Log::error('DEM DB connection failed: ' . $e->getMessage());
-        //     return redirect()->back()->withErrors(['error' => 'Unable to connect to the DEM database. Please try again later.']);
-        // }
-
-        $timestamp = now()->timestamp;
-
-        // Handle file upload
-        if ($request->hasFile('approved_contract')) {
-            $file = $request->file('approved_contract');
-            $filename = $timestamp . '_' . $file->getClientOriginalName();
-            $file->move(public_path('contract/uploaded-contract'), $filename);
+        try {
+            DB::connection('dem')->getPdo(); // Try connecting
+        } catch (\Exception $e) {
+            return back()->with(['message' => 'Unable to connect to the DEM database. Please try again later.', 'type' => 'error']);
         }
+                
+        try {
 
-        if ($validatedData['has_downpayment'] === 'yes') {
-            $status = Statuses::FOR_UPLOADING;
-        } else {
-            $status =  Statuses::CONFIRMED;
-        };
+            DB::beginTransaction();
+            // Handle file upload
+            $timestamp = now()->timestamp;
 
-        // Prepare order data
-        $orderData = [
-            'reference_number'   => Orders::generateReferenceNumber(),
-            'status'             => $status,
-            'customer_name'      => $validatedData['customer_name'],
-            'delivery_address'   => $validatedData['delivery_address'],
-            'email_address'      => $validatedData['email_address'],
-            'contact_details'    => $validatedData['contact_details'],
-            'financed_amount'    => $validatedData['financed_amount'],
-            'has_downpayment'    => $validatedData['has_downpayment'],
-            'downpayment_value'  => $validatedData['downpayment_value'],
-            'approved_contract'  => $filename ?? null,
-            'order_date'         => now(),
-        ];
+            if ($request->hasFile('approved_contract')) {
+                $file = $request->file('approved_contract');
+                $filename = $timestamp . '_' . $file->getClientOriginalName();
+                $file->move(public_path('contract/uploaded-contract'), $filename);
+            }
 
-        // Create order
-        $order = Orders::create($orderData);
-        $orderId = $order->id;
+            if ($validatedData['has_downpayment'] === 'yes') {
+                $status = Statuses::FOR_UPLOADING;
+            } else {
+                $status =  Statuses::CONFIRMED;
+            };
 
-        // Prepare order lines
-        $lines = [];
-        foreach ($validatedData['items'] as $item) {
-            $lines[] = [
-                'order_id'    => $orderId,
-                'digits_code' => $item['digits_code'],
-                'qty'         => $item['quantity'],
-                'created_at'  => now(),
+            // Prepare order data
+            $orderData = [
+                'reference_number'   => Orders::generateReferenceNumber(),
+                'status'             => $status,
+                'first_name'      => $validatedData['first_name'],
+                'last_name'      => $validatedData['last_name'],
+                'delivery_address'   => $validatedData['delivery_address'],
+                'email_address'      => $validatedData['email_address'],
+                'contact_details'    => $validatedData['contact_details'],
+                'financed_amount'    => $validatedData['financed_amount'],
+                'has_downpayment'    => $validatedData['has_downpayment'],
+                'downpayment_value'  => $validatedData['downpayment_value'] ?? null,
+                'approved_contract'  => $filename ?? null,
+                'order_date'         => now(),
             ];
-           self::reserveItem($orderId, $item['digits_code'], $item['quantity']);
-         
+
+            // Create order
+            $order = Orders::create($orderData);
+            $orderId = $order->id;
+
+            if (empty($request->items)) {
+                DB::rollback();
+                return back()->with(['message' => 'Please add an Item', 'type' => 'error']);
+            }
+
+            // Prepare order lines
+            $lines = [];
+            foreach ($request->items as $item) {
+                $lines[] = [
+                    'order_id'    => $orderId,
+                    'digits_code' => $item['digits_code'],
+                    'qty'         => $item['quantity'],
+                    'created_at'  => now(),
+                ];
+            self::reserveItem($orderId, $item['digits_code'], $item['quantity']);
+            
+            }
+
+
+            OrderLines::insert($lines);
+
+            // Prepare and send email
+            $encryptedId = Crypt::encryptString($orderId);
+
+            // add items for sending order confirmation
+            $orderData['items'] = OrderLines::join('item_masters', 'item_masters.digits_code', '=', 'order_lines.digits_code')
+                ->where('order_lines.order_id', $orderId)
+                ->select('item_masters.item_description', 'order_lines.qty')
+                ->get()
+                ->toArray();
+
+            if ($validatedData['has_downpayment'] === 'yes') {
+                Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
+                    'customer_name' => $validatedData['customer_name'],
+                    'payment_link'  => url('/upload/' . $encryptedId),
+                ]));
+            } else {
+                Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
+                self::createDemTransaction($orderId);
+            }
+
+            DB::commit();
+            return redirect('/orders')->with(['message' => 'Order creation Success', 'type' => 'success']);
         }
-        OrderLines::insert($lines);
-
-        // Prepare and send email
-        $encryptedId = Crypt::encryptString($orderId);
-
-        // add items for sending order confirmation
-        $orderData['items'] = OrderLines::join('item_masters', 'item_masters.digits_code', '=', 'order_lines.digits_code')
-            ->where('order_lines.order_id', $orderId)
-            ->select('item_masters.item_description', 'order_lines.qty')
-            ->get()
-            ->toArray();
-
-        if ($validatedData['has_downpayment'] === 'yes') {
-            Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
-                'customer_name' => $validatedData['customer_name'],
-                'payment_link'  => url('/upload/' . $encryptedId),
-            ]));
-        } else {
-            Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
-            self::createDemTransaction($orderId);
+        catch (\Exception $e) {
+            DB::rollback();
+            CommonHelpers::LogSystemError('Orders', $e->getMessage());
+            return back()->with(['message' => 'Order transaction failed', 'type' => 'error']);
         }
 
-        return redirect('/orders');
     }
 
     public function reserveItem($orderId, $digits_code, $quantity)
@@ -334,7 +365,7 @@ class OrdersController extends Controller
         }
     }
 
-      public function customerUploadFile(Request $request)
+    public function customerUploadFile(Request $request)
     {
         try {
             $orderId = Crypt::decryptString($request->encrypted_id);

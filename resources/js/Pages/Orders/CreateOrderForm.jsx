@@ -5,15 +5,34 @@ import { useToast } from "../../Context/ToastContext";
 import CustomSelect from "../../Components/Dropdown/CustomSelect";
 import axios from "axios";
 import InputComponent from "../../Components/Forms/Input";
+import TextArea from "../../Components/Forms/TextArea";
+import { useTheme } from "../../Context/ThemeContext";
+import LoginInputTooltip from "../../Components/Tooltip/LoginInputTooltip";
+import useThemeStyles from "../../Hooks/useThemeStyles";
 
 const CreateOrderForm = ({ page_title, sku }) => {
     const { handleToast } = useToast();
+    const { theme } = useTheme();
+    const { primayActiveColor, textColorActive, buttonSwalColor } = useThemeStyles(theme);
     const [uploadedFile, setUploadedFile] = useState(null);
     const [modelFilter, setModelFilter] = useState("");
     const [colorFilter, setColorFilter] = useState("");
     const [sizeFilter, setSizeFilter] = useState("");
     const [selectedItemForSelect, setSelectedItemForSelect] = useState(null);
     const [selectedProducts, setSelectedProducts] = useState([]);
+    const { data, setData, post, processing, errors, reset } = useForm({
+        first_name: "",
+        last_name: "",
+        delivery_address: "",
+        email_address: "",
+        contact_details: "+639",
+        financed_amount: "",
+        has_downpayment: "no",
+        downpayment_value: "",
+        approved_contract: "",
+        items: [],
+    });
+    
 
     const skuOptions = sku.map((item) => ({
         value: item.digits_code,
@@ -85,7 +104,6 @@ const CreateOrderForm = ({ page_title, sku }) => {
     };
 
     const handleFileUpload = (e) => {
-        console.log(data);
         const file = e.target.files?.[0];
         if (file) {
             setUploadedFile(file);
@@ -205,33 +223,59 @@ const CreateOrderForm = ({ page_title, sku }) => {
         setData("items", formattedItems);
     }, [selectedProducts]);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
-        customer_name: "",
-        delivery_address: "",
-        email_address: "",
-        contact_details: "",
-        financed_amount: "",
-        has_downpayment: "no",
-        downpayment_value: "",
-        approved_contract: "",
-        items: [],
-    });
 
     const handleChange = (e) => {
         const name = e.name ? e.name : e.target.name;
         const value = e.value ? e.value : e.target.value;
         setData(name, value);
-        console.log(selectedProducts);
+    };
+
+    const handleMobileChange = (e) => {
+        let value = e.target.value;
+
+        // Ensure input starts with +639
+        if (!value.startsWith("+639")) {
+            value = "+639";
+        }
+
+        // Allow only digits after +639
+        const digits = value.slice(4).replace(/\D/g, ""); // Remove non-digits
+        value = "+639" + digits.slice(0, 9); // Limit to 9 digits after +639
+
+        handleChange({
+            target: {
+                name: "contact_details",
+                value: value,
+            },
+        });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post("/orders/store", {
-            onSuccess: (response) => {
-                console.log(response);
-                handleToast("Order added successfully", "success");
-            },
+
+        Swal.fire({
+            title: `<p class="font-poppins text-3xl" >Do you want to submit this Order?</p>`,
+            showCancelButton: true,
+            confirmButtonText: `Submit`,
+            confirmButtonColor: buttonSwalColor,
+            icon: "question",
+            iconColor: buttonSwalColor,
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                post("/orders/store", {
+                    onSuccess: (data) => {
+                        const { message, type } = data.props.auth.sessions;
+                        handleToast(message, type);
+                    },
+                    onError: (data) => {
+                        const { message, type } = data.props.auth.sessions;
+                        handleToast(message, type);
+                    },
+                });
+            }
         });
+
     };
 
     return (
@@ -250,176 +294,101 @@ const CreateOrderForm = ({ page_title, sku }) => {
                             </p>
                         </div>
                         <div className="p-6">
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-3">
                                 {/* Customer Name */}
-                                <div className="space-y-2">
+                                <div className="md:grid md:grid-cols-2 md:gap-1 space-y-2 md:space-y-0 w-full">
                                     <InputComponent
-                                        placeholder="Enter full name"
-                                        name="customer_name"
+                                        placeholder="Enter Customer First Name"
+                                        name="first_name"
+                                        displayName="Customer First Name"
                                         onChange={handleChange}
-                                        onError={errors.customer_name}
+                                        onError={errors.first_name}
+                                    />
+                                    <InputComponent
+                                        placeholder="Enter Customer Last Name"
+                                        name="last_name"
+                                        displayName="Customer Last Name"
+                                        onChange={handleChange}
+                                        onError={errors.last_name}
                                     />
                                 </div>
 
                                 {/* Delivery Address */}
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="delivery_address"
-                                        className="block text-sm font-medium text-gray-700"
-                                    >
-                                        Delivery Address
-                                    </label>
-                                    <textarea
-                                        id="delivery_address"
-                                        name="delivery_address"
-                                        placeholder="Enter complete delivery address"
-                                        onChange={handleChange}
-                                        rows={3}
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical"
-                                    />
-                                </div>
+                                <TextArea
+                                    name="delivery_address"
+                                    onChange={handleChange}
+                                    placeholder="Enter Complete Delivery Address"
+                                    rows={3}
+                                    onError={errors.delivery_address}
+                                />
 
                                 {/* Email Address */}
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="email_address"
-                                        className="block text-sm font-medium text-gray-700"
-                                    >
-                                        Email Address
-                                    </label>
-                                    <input
-                                        id="email_address"
-                                        name="email_address"
-                                        type="email"
-                                        placeholder="Enter email address"
-                                        onChange={handleChange}
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-
+                                <InputComponent
+                                    placeholder="Enter Email Address"
+                                    name="email_address"
+                                    onChange={handleChange}
+                                    onError={errors.email_address}
+                                />
+                          
                                 {/* Contact Details */}
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="contact_details"
-                                        className="block text-sm font-medium text-gray-700"
-                                    >
-                                        Contact Details
-                                    </label>
-                                    <input
-                                        id="contact_details"
-                                        name="contact_details"
-                                        type="text"
-                                        onChange={handleChange}
-                                        placeholder="Enter phone number or other contact information"
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
+                                <InputComponent
+                                    placeholder="+639XXXXXXXXX"
+                                    name="contact_details"
+                                    type="tel"
+                                    value={data.contact_details}
+                                    onChange={handleMobileChange}
+                                    onError={errors.contact_details}
+                                />
 
                                 {/* Downpayment - Yes/No */}
-                                <div className="space-y-3">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Downpayment
-                                    </label>
-                                    <div className="flex gap-6">
-                                        <div className="flex items-center space-x-2">
-                                            <input
-                                                type="radio"
-                                                id="downpayment-yes"
-                                                name="has_downpayment"
-                                                value="yes"
-                                                checked={
-                                                    data.has_downpayment ===
-                                                    "yes"
-                                                }
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "has_downpayment",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-400"
-                                            />
-                                            <label
-                                                htmlFor="downpayment-yes"
-                                                className="text-sm text-gray-700"
-                                            >
-                                                Yes
-                                            </label>
+                                <div className='mt-2'>
+                                    <label className={`block text-xs font-bold ${theme === 'bg-skin-black' ? ' text-gray-400' : 'text-gray-700'}  font-poppins`}>Downpayment</label>
+                                    <div className="relative rounded-lg mt-1 flex space-x-1 overflow-hidden border-2 bg-gray-300">
+                                        <div
+                                            className={`absolute ${theme} rounded-md h-full w-1/2 transition-all duration-300 ${
+                                            data.has_downpayment === "yes" ? "left-0" : "left-1/2"}`}
+                                        >
                                         </div>
-                                        <div className="flex items-center space-x-2">
-                                            <input
-                                                type="radio"
-                                                id="downpayment-no"
-                                                name="has_downpayment"
-                                                value="no"
-                                                checked={
-                                                    data.has_downpayment ===
-                                                    "no"
-                                                }
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "has_downpayment",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-400"
-                                            />
-                                            <label
-                                                htmlFor="downpayment-no"
-                                                className="text-sm text-gray-700"
-                                            >
-                                                No
-                                            </label>
-                                        </div>
+                                        <button
+                                            type="button"
+                                            className={` flex-1 py-1 z-10 outline-none text-sm font-medium
+                                            ${data.has_downpayment === "yes" ? "text-white" : "text-black/50"}`}
+                                            onClick={() => setData("has_downpayment", "yes")}
+                                        >
+                                            Yes
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`flex-1 py-1.5 z-10 outline-none text-sm font-medium
+                                            ${data.has_downpayment == "no" ? "text-white" : "text-black/50"}`}
+                                            onClick={() => setData("has_downpayment", "no")}
+                                        >
+                                            No
+                                        </button>
                                     </div>
                                 </div>
 
                                 {/* Downpayment Value (conditional) */}
                                 {data.has_downpayment === "yes" && (
-                                    <div className="space-y-2">
-                                        <label
-                                            htmlFor="downpayment_value"
-                                            className="block text-sm font-medium text-gray-700"
-                                        >
-                                            Downpayment Value (if with DP)
-                                        </label>
-                                        <input
-                                            id="downpayment_value"
-                                            name="downpayment_value"
-                                            type="number"
-                                            placeholder="Enter downpayment amount"
-                                            onChange={handleChange}
-                                            required
-                                            className="w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        />
-                                    </div>
+                                    <InputComponent
+                                        placeholder="Enter Downpayment Amount"
+                                        name="downpayment_value"
+                                        onChange={handleChange}
+                                        onError={errors.downpayment_value}
+                                    />
                                 )}
 
                                 {/* Financed Amount */}
-                                <div className="space-y-2">
-                                    <label
-                                        htmlFor="financed_amount"
-                                        className="block text-sm font-medium text-gray-700"
-                                    >
-                                        Financed Amount
-                                    </label>
-                                    <input
-                                        id="financed_amount"
-                                        name="financed_amount"
-                                        type="number"
-                                        placeholder="Enter financed amount"
-                                        onChange={handleChange}
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
+                                <InputComponent
+                                    placeholder="Enter Financed Amount"
+                                    name="financed_amount"
+                                    onChange={handleChange}
+                                    onError={errors.financed_amount}
+                                />
 
                                 {/* SKU Details with Filters */}
-                                <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-gray-700">
+                                <div className="space-y-3">
+                                    <label className="block text-xs font-bold text-gray-700">
                                         SKU Filter
                                     </label>
 
@@ -440,70 +409,34 @@ const CreateOrderForm = ({ page_title, sku }) => {
 
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                             {/* Model Filter */}
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                    Model
-                                                </label>
-                                                <CustomSelect
-                                                    value={uniqueModels.find(
-                                                        (option) =>
-                                                            option.value ===
-                                                            modelFilter
-                                                    )}
-                                                    onChange={(option) =>
-                                                        setModelFilter(
-                                                            option?.value || ""
-                                                        )
-                                                    }
-                                                    options={uniqueModels}
-                                                    placeholder="Select model..."
-                                                    maxMenuHeight="300px"
-                                                />
-                                            </div>
+                                            <CustomSelect
+                                                displayName="Model"
+                                                value={uniqueModels.find((option) =>option.value === modelFilter)}
+                                                onChange={(option) =>setModelFilter(option?.value || "")}
+                                                options={uniqueModels}
+                                                placeholder="Select model..."
+                                                maxMenuHeight="300px"
+                                            />
 
                                             {/* Color Filter */}
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                    Color
-                                                </label>
-                                                <CustomSelect
-                                                    value={uniqueColors.find(
-                                                        (option) =>
-                                                            option.value ===
-                                                            colorFilter
-                                                    )}
-                                                    onChange={(option) =>
-                                                        setColorFilter(
-                                                            option?.value || ""
-                                                        )
-                                                    }
-                                                    options={uniqueColors}
-                                                    placeholder="Select color..."
-                                                    maxMenuHeight="300px"
-                                                />
-                                            </div>
+                                            <CustomSelect
+                                                displayName="Color"
+                                                value={uniqueColors.find((option) =>option.value === colorFilter)}
+                                                onChange={(option) => setColorFilter(option?.value || "")}
+                                                options={uniqueColors}
+                                                placeholder="Select color..."
+                                                maxMenuHeight="300px"
+                                            />
 
                                             {/* Size Filter */}
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                    Storage/Size
-                                                </label>
-                                                <CustomSelect
-                                                    value={uniqueSizes.find(
-                                                        (option) =>
-                                                            option.value ===
-                                                            sizeFilter
-                                                    )}
-                                                    onChange={(option) =>
-                                                        setSizeFilter(
-                                                            option?.value || ""
-                                                        )
-                                                    }
-                                                    options={uniqueSizes}
-                                                    placeholder="Select size..."
-                                                    maxMenuHeight="300px"
-                                                />
-                                            </div>
+                                            <CustomSelect
+                                                displayName="Storage/Size"
+                                                value={uniqueSizes.find((option) => option.value === sizeFilter)}
+                                                onChange={(option) => setSizeFilter(option?.value || "")}
+                                                options={uniqueSizes}
+                                                placeholder="Select size..."
+                                                maxMenuHeight="300px"
+                                            />
                                         </div>
 
                                         <div className="mt-2 text-xs text-gray-500">
@@ -652,11 +585,11 @@ const CreateOrderForm = ({ page_title, sku }) => {
                                     <div className="space-y-2">
                                         <label
                                             htmlFor="approved_contract"
-                                            className="block text-sm font-medium text-gray-700"
+                                            className="block text-xs font-bold text-gray-700"
                                         >
                                             Upload of Approved Contract
                                         </label>
-                                        <div className="border-2 border-dashed border-gray-400 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer">
+                                        <div className={`relative border-2 ${errors.approved_contract ? 'border-red-500' : 'border-dashed border-gray-400 hover:border-gray-400'}  rounded-lg p-6 text-center  transition-colors cursor-pointer`}>
                                             <input
                                                 id="approved_contract"
                                                 name="approved_contract"
@@ -717,6 +650,13 @@ const CreateOrderForm = ({ page_title, sku }) => {
                                                     </>
                                                 )}
                                             </label>
+                                             {errors.approved_contract && 
+                                                <LoginInputTooltip content={errors.approved_contract}>
+                                                <i
+                                                    className="fa-solid fa-circle-info text-red-600 absolute cursor-pointer top-1/2 text-xs md:text-base right-1.5 md:right-3 transform -translate-y-1/2">
+                                                </i>
+                                                </LoginInputTooltip>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -725,13 +665,13 @@ const CreateOrderForm = ({ page_title, sku }) => {
                                 <div className="flex gap-4 pt-4">
                                     <button
                                         type="button"
-                                        className="flex-1 px-4 py-2 border border-gray-400 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                                        className="flex-1 px-4 py-2 border border-gray-400 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="flex-1 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                                        className="flex-1 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-black/70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors"
                                     >
                                         Submit Form
                                     </button>

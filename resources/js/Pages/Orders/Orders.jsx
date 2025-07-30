@@ -38,8 +38,6 @@ const Orders = ({page_title, queryParams, orders}) => {
         router.get(pathname);
     };
 
-    console.log(orders)
-
     return (
         <>
             <Head title={page_title}/>
