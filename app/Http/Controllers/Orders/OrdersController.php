@@ -339,9 +339,10 @@ class OrdersController extends Controller
             'billing_email'            => $headerDatas->email_address,
             'billing_phone'            => $headerDatas->contact_details,
             'complete_billing_address' => $headerDatas->delivery_address,
-            // 'items_subtotal'           => $headerDatas->items_subtotal,
-            // 'order_total'              => $headerDatas->order_total,
-            // 'total_quantity'           => $headerDatas->total_quantity,
+            'shipping_first_name'      => $headerDatas->first_name,
+            'shipping_last_name'       => $headerDatas->last_name,
+            'billing_full_name'        => $headerDatas->first_name ." ". $headerDatas->last_name,
+            'shipping_full_name'       => $headerDatas->first_name ." ". $headerDatas->last_name,
             'created_by'               => 1000, //DEM Creator
 		    'created_at'               => date('Y-m-d H:i:s')
         ]);
@@ -354,7 +355,6 @@ class OrdersController extends Controller
                 'item_id'          => $items->id,
                 'sku'              => $items->digits_code ?? $val->digits_code,
                 'item_description' => $items->item_description,
-                // 'cost'             => $items->price ?? $val->item_cost,
                 'quantity'         => $val->qty
             ]);
         }
