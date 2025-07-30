@@ -16,6 +16,7 @@ class AdmPrivileges extends Model
     public const WAREHOUSE = 4;
     public const WIMS = 5;
     public const ECOMM = 6;
+    public const LOGISTICS = 7;
    
 
     protected $guarded = [];

@@ -11,7 +11,7 @@
     <div class="min-h-screen bg-gray-50 py-8 px-4">
         <div class="max-w-4xl mx-auto">
             <div class="bg-white rounded-lg shadow-md p-8">
-                 {{-- Not Rejected --}}
+                 {{-- Rejected - reupload --}}
                 @if($order->status != 4)
                     <!-- Already Uploaded State -->
                     <div class="text-center">

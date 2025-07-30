@@ -3,7 +3,7 @@ import ContentPanel from "../../Components/Table/ContentPanel";
 import { useState } from "react";
 import { Check, X } from "lucide-react";
 
-const ViewOrderDetails = ({ page_title, order, lines }) => {
+const AccoutingVerification = ({ page_title, order, lines }) => {
     const [uploadedFile, setUploadedFile] = useState(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -602,4 +602,4 @@ const ViewOrderDetails = ({ page_title, order, lines }) => {
     );
 };
 
-export default ViewOrderDetails;
+export default AccoutingVerification;

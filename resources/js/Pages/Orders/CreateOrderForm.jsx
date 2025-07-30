@@ -101,9 +101,10 @@ const CreateOrderForm = ({ page_title, sku }) => {
             const response = await axios.post(
                 `/item_inventories/check-inventory/${selectedOption.value}`
             );
-            const { qty } = response.data;
+            const { available_qty } = response.data;
+            console.log(available_qty);
 
-            if (qty <= 0) {
+            if (available_qty <= 0) {
                 Swal.fire(
                     "Out of Stock",
                     "The selected item has no available quantity.",
@@ -123,10 +124,10 @@ const CreateOrderForm = ({ page_title, sku }) => {
                     const currentQty =
                         updatedProducts[existingProductIndex].quantity;
 
-                    if (currentQty + 1 > qty) {
+                    if (currentQty + 1 > available_qty) {
                         Swal.fire(
                             "Stock Limit Reached",
-                            `Only ${qty} units are available.`,
+                            `Only ${available_qty} units are available.`,
                             "warning"
                         );
                         return prevProducts; // No update
@@ -156,7 +157,7 @@ const CreateOrderForm = ({ page_title, sku }) => {
             const response = await axios.post(
                 `/item_inventories/check-inventory/${skuValue}`
             );
-            const { qty } = response.data;
+            const { available_qty } = response.data;
 
             setSelectedProducts((prevProducts) => {
                 return prevProducts
@@ -164,10 +165,10 @@ const CreateOrderForm = ({ page_title, sku }) => {
                         if (p.value === skuValue) {
                             const newQty = p.quantity + delta;
 
-                            if (newQty > qty) {
+                            if (newQty > available_qty) {
                                 Swal.fire(
                                     "Stock Limit Reached",
-                                    `Only ${qty} units are available.`,
+                                    `Only ${available_qty} units are available.`,
                                     "warning"
                                 );
                                 return p; // No change
@@ -220,7 +221,7 @@ const CreateOrderForm = ({ page_title, sku }) => {
         const name = e.name ? e.name : e.target.name;
         const value = e.value ? e.value : e.target.value;
         setData(name, value);
-        console.log(data.items);
+        console.log(selectedProducts);
     };
 
     const handleSubmit = (e) => {
@@ -252,18 +253,6 @@ const CreateOrderForm = ({ page_title, sku }) => {
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 {/* Customer Name */}
                                 <div className="space-y-2">
-                                    {/* <label htmlFor="customer_name" className="block text-sm font-medium text-gray-700">
-                Customer Name
-              </label> */}
-                                    {/* <input
-                id="customer_name"
-                name="customer_name"
-                type="text"
-                placeholder="Enter full name"
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              /> */}
                                     <InputComponent
                                         placeholder="Enter full name"
                                         name="customer_name"
