@@ -16,6 +16,7 @@ class Statuses extends Model
     public const FOR_SCHEDULE = 5;
     public const FOR_DELIVERY = 6;
     public const TO_CLOSE = 7;
+    public const CLOSED = 8;
 
     protected $fillable = [
         'id',

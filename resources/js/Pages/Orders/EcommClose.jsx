@@ -1,40 +1,26 @@
 import { Head, useForm } from "@inertiajs/react";
 import ContentPanel from "../../Components/Table/ContentPanel";
 import { Check, X } from "lucide-react";
-import LoginInputTooltip from "../../Components/Tooltip/LoginInputTooltip";
-import { useState } from "react";
 import { useTheme } from "../../Context/ThemeContext";
 import useThemeStyles from "../../Hooks/useThemeStyles";
 import { useToast } from "../../Context/ToastContext";
 
-const LogisticsDelivery = ({ page_title, order, lines }) => {
+const EcommClose = ({ page_title, order, lines }) => {
     const { handleToast } = useToast();
     const { theme } = useTheme();
     const { primayActiveColor, textColorActive, buttonSwalColor } =
         useThemeStyles(theme);
 
-    const [uploadedFile, setUploadedFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(null);
     const { data, setData, post, processing, errors, reset } = useForm({
         order_id: order.id,
-        proof_of_delivery: "",
     });
-
-    const handleFileUpload = (e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setUploadedFile(file);
-            setPreviewUrl(URL.createObjectURL(file)); // generate preview URL
-        }
-        setData("proof_of_delivery", file);
-    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         Swal.fire({
-            title: `<p class="font-poppins text-3xl" >Do you want to proceed this Order?</p>`,
+            title: `<p class="font-poppins text-3xl" >Do you want to close this Order?</p>`,
             showCancelButton: true,
-            confirmButtonText: `Deliver`,
+            confirmButtonText: `Close`,
             confirmButtonColor: buttonSwalColor,
             icon: "question",
             iconColor: buttonSwalColor,
@@ -372,100 +358,6 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                         </div>
                                     )}
 
-                                    {/* Upload Downpayment Receipt */}
-                                    <div className="space-y-2">
-                                        <label
-                                            htmlFor="proof_of_delivery"
-                                            className="block text-sm font-medium text-gray-700"
-                                        >
-                                            Upload Proof of Delivery
-                                        </label>
-                                        <div
-                                            className={`relative border-2 ${
-                                                errors.proof_of_delivery
-                                                    ? "border-red-500"
-                                                    : "border-dashed border-gray-400 hover:border-gray-400"
-                                            }  rounded-lg p-6 text-center  transition-colors cursor-pointer`}
-                                        >
-                                            <input
-                                                id="proof_of_delivery"
-                                                name="proof_of_delivery"
-                                                type="file"
-                                                accept=".jpg,.jpeg,.png"
-                                                onChange={handleFileUpload}
-                                                className="hidden"
-                                            />
-                                            <label
-                                                htmlFor="proof_of_delivery"
-                                                className="cursor-pointer flex flex-col items-center gap-2"
-                                            >
-                                                {uploadedFile ? (
-                                                    <>
-                                                        {" "}
-                                                        {previewUrl && (
-                                                            <img
-                                                                src={previewUrl}
-                                                                alt="Preview"
-                                                                className="mt-4 max-h-48 mx-auto rounded border"
-                                                            />
-                                                        )}
-                                                        <svg
-                                                            className="h-8 w-8 text-green-600"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                            />
-                                                        </svg>
-                                                        <span className="text-sm font-medium text-green-600">
-                                                            {uploadedFile.name}
-                                                        </span>
-                                                        <span className="text-xs text-gray-500">
-                                                            Click to change file
-                                                        </span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <svg
-                                                            className="h-8 w-8 text-gray-400"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                                                            />
-                                                        </svg>
-                                                        <span className="text-sm font-medium text-gray-700">
-                                                            Click to Upload
-                                                            Proof of Delivery
-                                                        </span>
-                                                        <span className="text-xs text-gray-500">
-                                                            JPG, PNG up to 10MB
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </label>
-                                            {errors.proof_of_delivery && (
-                                                <LoginInputTooltip
-                                                    content={
-                                                        errors.proof_of_delivery
-                                                    }
-                                                >
-                                                    <i className="fa-solid fa-circle-info text-red-600 absolute cursor-pointer top-1/2 text-xs md:text-base right-1.5 md:right-3 transform -translate-y-1/2"></i>
-                                                </LoginInputTooltip>
-                                            )}
-                                        </div>
-                                    </div>
-
                                     {/* Action Buttons */}
                                     <div className="flex justify-between gap-4 pt-4 border-t border-gray-200">
                                         <button
@@ -483,7 +375,7 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                             type="submit"
                                             className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:brightness-90"
                                         >
-                                            Deliver
+                                            Close
                                         </button>
                                     </div>
                                 </div>
@@ -496,4 +388,4 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
     );
 };
 
-export default LogisticsDelivery;
+export default EcommClose;

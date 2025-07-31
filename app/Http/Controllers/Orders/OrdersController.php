@@ -43,6 +43,8 @@ class OrdersController extends Controller
             $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy'])->whereIn('status',[Statuses::FOR_VERIFICATION]);
         }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::LOGISTICS){
             $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy'])->whereIn('status',[Statuses::FOR_SCHEDULE, Statuses::FOR_DELIVERY]);
+        }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::ECOMM){
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy'])->whereIn('status',[Statuses::TO_CLOSE]);
         }else {
             $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy']);
         }
@@ -231,7 +233,10 @@ class OrdersController extends Controller
     public function view ($id) {
         $data = [];
         $data['page_title'] = ' Order Details';
-        $data['order'] = Orders::where('id',$id)->first();
+        $data['order'] = Orders::leftJoin('statuses', 'statuses.id', 'orders.status')
+            ->select('orders.*', 'statuses.name as status_name')
+            ->where('orders.id', $id)
+            ->first();
         $data['lines'] = OrderLines::leftJoin('item_masters', 'item_masters.digits_code', 'order_lines.digits_code')
         ->where('order_id', $id)->get();
         $data['my_privilege_id'] = CommonHelpers::myPrivilegeId();
@@ -242,7 +247,10 @@ class OrdersController extends Controller
     public function update($id) {
         
         $data = [];
-        $data['order'] = Orders::where('id',$id)->first();
+        $data['order'] = Orders::leftJoin('statuses', 'statuses.id', 'orders.status')
+            ->select('orders.*', 'statuses.name as status_name')
+            ->where('orders.id', $id)
+            ->first();
         $data['lines'] = OrderLines::leftJoin('item_masters', 'item_masters.digits_code', 'order_lines.digits_code')
         ->where('order_id', $id)->get();
  
@@ -254,8 +262,10 @@ class OrdersController extends Controller
                 }else {
                     return Inertia::render("Orders/LogisticsDelivery", $data);
                 }
-            }
+        }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::ECOMM) {
+            return Inertia::render("Orders/EcommClose", $data);
         }
+    }
         
 
     public function updateSave(Request $request) {
@@ -263,7 +273,7 @@ class OrdersController extends Controller
         try {
 
             DB::beginTransaction();
-            
+
             $order = Orders::where('id', $request->order_id)->first();
             if (!$order){
                   return back()->with(['message' => 'Order not Found', 'type' => 'error']);
@@ -280,7 +290,7 @@ class OrdersController extends Controller
                 }
                     
                 if ($request->action == 'reject') {
-
+                    
                     Orders::where('id', $request->order_id)->update([
                         'status' => Statuses::REJECTED,
                         'rejected_payment_proof' => implode(',', $existingRejectedProofs),
@@ -354,9 +364,8 @@ class OrdersController extends Controller
                 DB::commit();
                 return redirect('/orders')->with(['message' => 'Order Schedule Successful', 'type' => 'success']);
                     
-            }else if ($order->status == Statuses::FOR_DELIVERY)
-            {
-                self::approveReservation($order->id);
+            }else if ($order->status == Statuses::FOR_DELIVERY){
+               
                 $request->validate([
                             'proof_of_delivery'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
                         ]);
@@ -374,11 +383,20 @@ class OrdersController extends Controller
                         'scheduled_at_logistics' => now(),
                 ]);
 
+                 self::deductReservation($order->id);
+                    
                 DB::commit();
                 return redirect('/orders')->with(['message' => 'Order Delivery Success', 'type' => 'success']);
-                    
+            } else if ($order->status == Statuses::TO_CLOSE) {
+                Orders::where('id', $request->order_id)->update([
+                    'status' => Statuses::CLOSED,
+                    'closed_by_ecomm' => CommonHelpers::myId(),
+                    'closed_at_ecomm' => now(),
+                ]);
+                DB::commit();
+                return redirect('/orders')->with(['message' => 'Order Closed Successfully', 'type' => 'success']);
             }
-           
+            
         }
         catch (\Exception $e) {
             DB::rollback();
@@ -388,7 +406,7 @@ class OrdersController extends Controller
         
     }
 
-    public function approveReservation($orderId)
+    public function deductReservation($orderId)
         {
         $reservations = ItemReservation::where('order_id', $orderId)
                         ->where('status', 'reserved')

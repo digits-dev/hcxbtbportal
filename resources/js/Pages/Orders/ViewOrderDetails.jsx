@@ -25,7 +25,7 @@ const ViewOrderDetails = ({ page_title, order, lines, my_privilege_id }) => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        Approved
+                                        {order.status_name}
                                     </span>
                                 </div>
                             </div>
@@ -300,7 +300,7 @@ const ViewOrderDetails = ({ page_title, order, lines, my_privilege_id }) => {
                                                                         src={
                                                                             fileUrl
                                                                         }
-                                                                        alt={`Payment Proof ${
+                                                                        alt={`Rejected Payment Proof ${
                                                                             index +
                                                                             1
                                                                         }`}

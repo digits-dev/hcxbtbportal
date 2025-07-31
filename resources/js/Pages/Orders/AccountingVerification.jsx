@@ -5,8 +5,10 @@ import { Check, X } from "lucide-react";
 import LoginInputTooltip from "../../Components/Tooltip/LoginInputTooltip";
 import { useTheme } from "../../Context/ThemeContext";
 import useThemeStyles from "../../Hooks/useThemeStyles";
+import { useToast } from "../../Context/ToastContext";
 
 const AccoutingVerification = ({ page_title, order, lines }) => {
+    const { handleToast } = useToast();
     const { theme } = useTheme();
     const { primayActiveColor, textColorActive, buttonSwalColor } =
         useThemeStyles(theme);
@@ -44,21 +46,16 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
             reverseButtons: true,
         }).then(async (result) => {
             if (result.isConfirmed) {
-                try {
-                    post("/orders/update_save", {
-                        onSuccess: (response) => {
-                            console.log(response);
-                            handleToast(
-                                "Order Updated successfully",
-                                "success"
-                            );
-                        },
-                    });
-                } catch (error) {
-                    {
-                        console.log(error);
-                    }
-                }
+                post("/orders/update_save", {
+                    onSuccess: (data) => {
+                        const { message, type } = data.props.auth.sessions;
+                        handleToast(message, type);
+                    },
+                    onError: (data) => {
+                        const { message, type } = data.props.auth.sessions;
+                        handleToast(message, type);
+                    },
+                });
             }
         });
     };
