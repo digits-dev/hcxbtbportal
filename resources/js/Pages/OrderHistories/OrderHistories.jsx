@@ -20,28 +20,13 @@ import RowData from "../../Components/Table/RowData";
 import RowAction from "../../Components/Table/RowAction";
 import CustomFilter from "../../Components/Table/Buttons/CustomFilter";
 import moment from "moment/moment";
-import Modal from "../../Components/Modal/Modal";
-import StatusesAction from "./StatusesAction";
 
-const Statuses = ({page_title, queryParams, statuses}) => {
+const OrderHistories = ({page_title, queryParams, order_histories}) => {
 
-    const { theme } = useTheme();
     const { auth } = usePage().props;
+    const { theme } = useTheme();
     const { primayActiveColor, textColorActive } = useThemeStyles(theme);
     const [pathname, setPathname] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [action, setAction] = useState(null);
-
-    const [updateData, setUpdateData] = useState({
-        id: "",
-        name: "",
-        color: "",
-        status: "",
-    });
-
-    const handleModalClick = () => {
-        setIsModalOpen(!isModalOpen);
-    }
 
     useEffect(() => {
         const segments = window.location.pathname.split("/");
@@ -72,36 +57,21 @@ const Statuses = ({page_title, queryParams, statuses}) => {
                                 <i className="fa fa-rotate-right text-base p-[1px]"></i>
                             </Button>
                         </Tooltip>
-                        {auth.access.isCreate &&
-                            <Button
-                                extendClass={
-                                    (["bg-skin-white"].includes(theme)
-                                        ? primayActiveColor
-                                        : theme) + " py-[5px] px-[10px]"
-                                }
-                                type="button"
-                                fontColor={textColorActive}
-                                onClick={() => {
-                                    handleModalClick();
-                                    setAction("Add");
-                                    setUpdateData({
-                                        id: "",
-                                        name: "",
-                                        color: "",
-                                        status: "",
-                                    });
-                                }}
-                            >
-                                <i className="fa-solid fa-plus mr-1"></i> Add Status
-                            </Button>
-                        }
-                        <Export path="/item_masters/export" page_title={page_title}/>
+                        <Export path="/order_histories/export" page_title={page_title}/>
                     </div>
                     <div className="flex">
                         <CustomFilter>
                             <Filters filter_inputs={[
-                                {name: 'Status Name', column: 'name'},
-                                {name: 'Color', column: 'color'},
+                                {name: 'Reference Number', column: 'reference_number'},
+                                {name: 'Status', column: 'status'},
+                                {name: 'First Name', column: 'first_name'},
+                                {name: 'Last Name', column: 'last_name'},
+                                {name: 'Delivery Address', column: 'delivery_address'},
+                                {name: 'Email Address', column: 'email_address'},
+                                {name: 'Contact Details', column: 'contact_details'},
+                                {name: 'Downpayment', column: 'has_downpayment'},
+                                {name: 'Downpayment Value', column: 'downpayment_value'},
+                                {name: 'Financed Amount', column: 'financed_amount'},
                                 {name: 'Created By', column: 'created_by'},
                                 {name: 'Updated By', column: 'updated_by'},
                                 {name: 'Created Date', column: 'created_at'},
@@ -111,7 +81,7 @@ const Statuses = ({page_title, queryParams, statuses}) => {
                         <TableSearch queryParams={queryParams} />
                     </div>
                 </TopPanel>
-                <TableContainer data={statuses?.data}>
+                <TableContainer data={order_histories?.data}>
                     <Thead>
                         <Row>
                             <TableHeader
@@ -129,18 +99,60 @@ const Statuses = ({page_title, queryParams, statuses}) => {
                                 Status
                             </TableHeader>
                             <TableHeader
-                                name="name"
+                                name="reference_number"
                                 queryParams={queryParams}
                                 width="lg"
                             >
-                                Status Name
+                                Reference Number
                             </TableHeader>
                             <TableHeader
-                                name="color"
+                                name="customer_name"
                                 queryParams={queryParams}
                                 width="lg"
                             >
-                                Color
+                                Customer Name
+                            </TableHeader>
+                            <TableHeader
+                                name="delivery_address"
+                                queryParams={queryParams}
+                                width="xl"
+                            >
+                                Delivery Address
+                            </TableHeader>
+                            <TableHeader
+                                name="email_address"
+                                queryParams={queryParams}
+                                width="lg"
+                            >
+                                Email Address
+                            </TableHeader>
+                            <TableHeader
+                                name="contact_details"
+                                queryParams={queryParams}
+                                width="lg"
+                            >
+                                Contact Details
+                            </TableHeader>
+                            <TableHeader
+                                name="is_downpayment"
+                                queryParams={queryParams}
+                                width="md"
+                            >
+                                Downpayment
+                            </TableHeader>
+                            <TableHeader
+                                name="downpayment_value"
+                                queryParams={queryParams}
+                                width="lg"
+                            >
+                                Downpayment Value
+                            </TableHeader>
+                            <TableHeader
+                                name="financed_amount"
+                                queryParams={queryParams}
+                                width="lg"
+                            >
+                                Financed Amount
                             </TableHeader>
                             <TableHeader
                                 name="created_by"
@@ -172,61 +184,45 @@ const Statuses = ({page_title, queryParams, statuses}) => {
                             </TableHeader>
                         </Row>
                     </Thead>
-                    <Tbody data={statuses?.data}>
-                        {statuses &&
-                            statuses?.data.map((item, index) => (
+                    <Tbody data={order_histories?.data}>
+                        {order_histories &&
+                            order_histories?.data.map((item, index) => (
                                 <Row key={item.id}>
-                                     <RowData center>
-                                        {auth.access.isUpdate &&
-                                            <RowAction
-                                                type="button"
-                                                action="edit"
-                                                onClick={() => {
-                                                    handleModalClick();
-                                                    setAction("Update");
-                                                    setUpdateData({
-                                                        id: item.id,
-                                                        name: item.name,
-                                                        color: item.color,
-                                                        status: item.status,
-                                                    });
-                                                }}
-                                            />
-                                        }
-                                        <RowAction
-                                            type="button"
-                                            action="view"
-                                            onClick={() => {
-                                                handleModalClick();
-                                                setAction("View");
-                                                setUpdateData({
-                                                    id: item.id,
-                                                    name: item.name,
-                                                    color: item.color,
-                                                    status: item.status,
-                                                });
-                                            }}
+                                    <RowData center>
+                                      <RowAction
+                                        type="link"
+                                        action="view"
+                                        href={`order_histories/view/${item.id}`}
                                         />
                                     </RowData>
-                                    <RowStatus
-                                        systemStatus={
-                                            item.status === "ACTIVE"
-                                                ? "active"
-                                                : "inactive"
-                                        }
+                                    <RowStatus 
+                                        color={item?.get_status?.color}
                                     >
-                                        {item.status === "ACTIVE"
-                                            ? "ACTIVE"
-                                            : "INACTIVE"}
+                                        {item?.get_status?.name ?? '-'}
                                     </RowStatus>
                                     <RowData>
-                                        {item.name ?? '-'}
+                                        {item.reference_number ?? '-'}
                                     </RowData>
                                     <RowData>
-                                        <div className="flex items-center">
-                                            <div className="w-5 h-5 rounded-md mr-2" style={{ backgroundColor: item.color }}> </div>
-                                            {item.color ?? '-'}
-                                        </div>
+                                        {`${item.first_name} ${item.last_name}`  ?? '-'}
+                                    </RowData>
+                                    <RowData>
+                                        {item.delivery_address ?? '-'}
+                                    </RowData>
+                                    <RowData>
+                                        {item.email_address ?? '-'}
+                                    </RowData>
+                                    <RowData>
+                                        {item.contact_details ?? '-'}
+                                    </RowData>
+                                    <RowData>
+                                        {item.has_downpayment}
+                                    </RowData>
+                                    <RowData>
+                                        {item.downpayment_value ?? '-'}
+                                    </RowData>
+                                    <RowData>
+                                        {item.financed_amount ?? '-'}
                                     </RowData>
                                     <RowData>
                                         {item.get_created_by?.name ?? '-'}
@@ -244,31 +240,10 @@ const Statuses = ({page_title, queryParams, statuses}) => {
                             ))}
                     </Tbody>
                 </TableContainer>
-                <Pagination extendClass={theme} paginate={statuses} />
+                <Pagination extendClass={theme} paginate={order_histories} />
             </ContentPanel>
-            <Modal
-                theme={theme}
-                show={isModalOpen}
-                onClose={handleModalClick}
-                title={
-                    action == "Add"
-                        ? "Add Status"
-                        : action == "Update"
-                        ? "Update Status"
-                        : "Status Information"
-                }
-                width="xl"
-                fontColor={textColorActive}
-                btnIcon="fa fa-edit"
-            >
-                <StatusesAction
-                    onClose={handleModalClick}
-                    action={action}
-                    updateData={updateData}
-                />
-            </Modal>
         </>
     );
 };
 
-export default Statuses;
+export default OrderHistories;

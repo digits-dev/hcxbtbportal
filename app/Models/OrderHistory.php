@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use app\Helpers\CommonHelpers;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Helpers\CommonHelpers;
 
-class Orders extends Model
+class OrderHistory extends Model
 {
     use HasFactory;
 
-      protected static function boot()
+    protected static function boot()
     {
         parent::boot();
 
@@ -23,8 +23,7 @@ class Orders extends Model
         });
     }
 
-
-    protected $fillable = [
+     protected $fillable = [
         'id',
         'reference_number',
         'status',
@@ -36,13 +35,29 @@ class Orders extends Model
         'has_downpayment',
         'downpayment_value',
         'financed_amount',
-        'item_id',
         'approved_contract',
         'payment_proof',
+        'rejected_payment_proof',
+        'dp_receipt',
+        'proof_of_delivery',
+        'schedule_date',
+        'transaction_type',
+        'carrier_name',
         'created_by',
         'updated_by',
         'created_at',
         'updated_at',
+        'deleted_at',
+        'verified_by_acctg',
+        'verified_at_acctg',
+        'rejected_by',
+        'rejected_at',
+        'scheduled_by_logistics',
+        'scheduled_at_logistics',
+        'delivered_by_logistics',
+        'delivered_at_logistics',
+        'closed_by_ecomm',
+        'closed_at_ecomm',
     ];
 
     protected $filterable = [
@@ -133,10 +148,6 @@ class Orders extends Model
         
     }
 
-    public function getLines(){
-        return $this->hasMany(OrderLines::class, 'order_id', 'id');
-    }
-
     public function getStatus() {
         return $this->belongsTo(Statuses::class, 'status', 'id');
     }
@@ -148,12 +159,4 @@ class Orders extends Model
     public function getUpdatedBy() {
         return $this->belongsTo(AdmUser::class, 'updated_by', 'id');
     }
-
-    public static function generateReferenceNumber()
-    {
-        $maxId = self::max('id'); 
-        $nextId = $maxId + 1; 
-        return 'HC' . str_pad($nextId, 6, '0', STR_PAD_LEFT);
-    }
-    
 }

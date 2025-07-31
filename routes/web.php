@@ -21,6 +21,7 @@ use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Deliveries\DeliveriesController;
 use App\Http\Controllers\ItemInventories\ItemInventoriesController;
 use App\Http\Controllers\ItemMasters\ItemMastersController;
+use App\Http\Controllers\OrderHistories\OrderHistoriesController;
 use App\Http\Controllers\Users\ChangePasswordController;
 use App\Http\Controllers\Users\ProfilePageController;
 use Illuminate\Support\Facades\Log;
@@ -215,6 +216,10 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('statuses')->group(function () {
         Route::post('/create', [StatusesController::class, 'create']);
         Route::post('/update', [StatusesController::class, 'update']);
+    });
+
+    Route::prefix('order_histories')->group(function () {
+        Route::get('/view/{id}', [OrderHistoriesController::class, 'view']);
     });
     
 });

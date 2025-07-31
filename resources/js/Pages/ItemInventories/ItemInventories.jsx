@@ -98,6 +98,20 @@ const ItemInventories = ({page_title, queryParams, item_inventories}) => {
                                 Stock
                             </TableHeader>
                             <TableHeader
+                                sortable={false}
+                                queryParams={queryParams}
+                                width="2xl"
+                            >
+                                Ordered Qty
+                            </TableHeader>
+                            <TableHeader
+                                sortable={false}
+                                queryParams={queryParams}
+                                width="2xl"
+                            >
+                                Reservable Qty
+                            </TableHeader>
+                            <TableHeader
                                 name="created_at"
                                 queryParams={queryParams}
                                 width="lg"
@@ -118,6 +132,12 @@ const ItemInventories = ({page_title, queryParams, item_inventories}) => {
                                     </RowData>
                                      <RowData>
                                         {item.qty ?? '-'}
+                                    </RowData>
+                                    <RowData>
+                                        {item.reserved_qty ?? '-'}
+                                    </RowData>
+                                    <RowData>
+                                        {item.qty - item.reserved_qty ?? '-'}
                                     </RowData>
                                     <RowData>
                                         {item.created_at ? (moment(item.created_at).format("YYYY-MM-DD HH:mm:ss")) : '-'}

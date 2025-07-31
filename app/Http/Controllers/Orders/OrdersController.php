@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Orders;
 
+use App\Exports\OrdersExport;
 use App\Helpers\CommonHelpers;
 use App\Http\Controllers\Controller;
 use App\Models\Orders;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class OrdersController extends Controller
 {
@@ -40,13 +42,13 @@ class OrdersController extends Controller
 
     public function getAllData(){
         if (CommonHelpers::myPrivilegeId() == AdmPrivileges::ACCOUNTING) {
-            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy'])->whereIn('status',[Statuses::FOR_VERIFICATION]);
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy', 'getLines.getItem'])->whereIn('status',[Statuses::FOR_VERIFICATION]);
         }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::LOGISTICS){
-            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy'])->whereIn('status',[Statuses::FOR_SCHEDULE, Statuses::FOR_DELIVERY]);
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy', 'getLines.getItem'])->whereIn('status',[Statuses::FOR_SCHEDULE, Statuses::FOR_DELIVERY]);
         }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::ECOMM){
-            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy'])->whereIn('status',[Statuses::TO_CLOSE]);
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy', 'getLines.getItem'])->whereIn('status',[Statuses::TO_CLOSE]);
         }else {
-            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy']);
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy', 'getLines.getItem']);
         }
         $filter = $query->searchAndFilter(request());
         $result = $filter->orderBy($this->sortBy, $this->sortDir);
@@ -553,5 +555,12 @@ class OrdersController extends Controller
                 'quantity'         => $val->qty
             ]);
         }
+    }
+
+    public function export(){
+        $filename = "Orders - " . date ('Y-m-d H:i:s');
+        $query = self::getAllData();
+
+        return Excel::download(new OrdersExport($query), $filename . '.xlsx');
     }
 }

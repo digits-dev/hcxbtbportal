@@ -98,6 +98,17 @@ class AdmMenusSeeder extends Seeder
                 'id_adm_privileges' => 1,
                 'sorting'           => 3
             ],
+            [
+                'name'              => 'Order History',
+                'type'              => 'Route',
+                'path'              => 'OrderHistories\OrderHistoriesControllerGetIndex',
+                'icon'              => 'fa-solid fa-clock-rotate-left',
+                'parent_id'         => 0,
+                'is_active'         => 1,
+                'is_dashboard'      => 1,
+                'id_adm_privileges' => 1,
+                'sorting'           => 4
+            ],
          
         ];
 

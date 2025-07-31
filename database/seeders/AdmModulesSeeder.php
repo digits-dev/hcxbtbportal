@@ -188,6 +188,16 @@ class AdmModulesSeeder extends Seeder
                 'is_active' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
             ],
+            [
+                'name' => 'Order History',
+                'icon' => 'fa-solid fa-clock-rotate-left',
+                'path' => 'order_histories',
+                'table_name' => 'order_histories',
+                'controller' => 'OrderHistories\OrderHistoriesController',
+                'is_protected' => 0,
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+            ],
 
         ];
 

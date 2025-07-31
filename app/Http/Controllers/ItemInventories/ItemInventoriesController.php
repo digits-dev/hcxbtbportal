@@ -57,6 +57,8 @@ class ItemInventoriesController extends Controller
             'Digits Code',
             'Item Description',
             'Stock',
+            'Ordered Qty',
+            'Reservable Qty',
             'Created Date',
         ];
 
@@ -64,24 +66,27 @@ class ItemInventoriesController extends Controller
             'getItem.digits_code',
             'getItem.item_description',
             'qty',
+            'reserved_qty',
+            'available_qty',
             'created_at',
         ];
 
         $filename = "Item Inventory - " . date ('Y-m-d H:i:s');
-        $query = self::getAllData();
+        $query = self::getAllData()->selectRaw('*, qty - reserved_qty as available_qty');
+
         return Excel::download(new SubmasterExport($query, $headers, $columns), $filename . '.xlsx');
 
     }
 
-        public function checkInventory($digits_code)
-        {
-            $item = ItemInventory::where('digits_code', $digits_code)->first();
+    public function checkInventory($digits_code)
+    {
+        $item = ItemInventory::where('digits_code', $digits_code)->first();
 
-            return response()->json([
-                'qty' => $item->qty,
-                'reserved_qty' => $item->reserved_qty,
-                'available_qty' => $item->qty - $item->reserved_qty,
-            ]);
-        }
+        return response()->json([
+            'qty' => $item->qty,
+            'reserved_qty' => $item->reserved_qty,
+            'available_qty' => $item->qty - $item->reserved_qty,
+        ]);
+    }
 
 }

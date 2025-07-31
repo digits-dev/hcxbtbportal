@@ -44,6 +44,14 @@ class AdmMenuPrivilegesSeeder extends Seeder
                 'id_adm_menus' => 7,
                 'id_adm_privileges' => 1
             ],
+            [
+                'id_adm_menus' => 8,
+                'id_adm_privileges' => 1
+            ],
+            [
+                'id_adm_menus' => 9,
+                'id_adm_privileges' => 1
+            ],
         ];
 
         foreach ($menus as $menu) {
