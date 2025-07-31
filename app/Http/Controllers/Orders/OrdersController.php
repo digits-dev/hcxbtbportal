@@ -229,7 +229,6 @@ class OrdersController extends Controller
         ]);
     }
 
-
     public function view ($id) {
         $data = [];
         $data['page_title'] = ' Order Details';
@@ -269,28 +268,28 @@ class OrdersController extends Controller
         
 
     public function updateSave(Request $request) {
-        
-        try {
 
-            DB::beginTransaction();
+        DB::beginTransaction();
+    
+        $order = Orders::where('id', $request->order_id)->first();
 
-            $order = Orders::where('id', $request->order_id)->first();
-            if (!$order){
-                  return back()->with(['message' => 'Order not Found', 'type' => 'error']);
+        if (!$order){
+                return back()->with(['message' => 'Order not Found', 'type' => 'error']);
+        }
+    
+        if ($order->status == Statuses::FOR_VERIFICATION) {
+
+            $existingRejectedProofs = $order->rejected_payment_proof
+                ? explode(',', $order->rejected_payment_proof)
+                : [];
+
+            if ($order->payment_proof) {
+                $existingRejectedProofs[] = $order->payment_proof;
             }
-        
-            if ($order->status == Statuses::FOR_VERIFICATION) {
                 
-                $existingRejectedProofs = $order->rejected_payment_proof
-                    ? explode(',', $order->rejected_payment_proof)
-                    : [];
+            if ($request->action == 'reject') {
 
-                if ($order->payment_proof) {
-                    $existingRejectedProofs[] = $order->payment_proof;
-                }
-                    
-                if ($request->action == 'reject') {
-                    
+                try{
                     Orders::where('id', $request->order_id)->update([
                         'status' => Statuses::REJECTED,
                         'rejected_payment_proof' => implode(',', $existingRejectedProofs),
@@ -298,23 +297,30 @@ class OrdersController extends Controller
                         'rejected_by' => CommonHelpers::myId(),
                         'rejected_at' => now(),
                     ]);
-
+    
                     $encryptedId = Crypt::encryptString($order->id);
-
+    
                     Mail::to($order->email_address)->send(new ReSendProofOfPaymentLink([
                         'customer_name' => $order->first_name." ".$order->last_name,
                         'payment_link' => url('/upload/' . $encryptedId),
                     ]));
-
+    
                     DB::commit();
                     return redirect('/orders')->with(['message' => 'Order has been Rejected', 'type' => 'success']);
+                }
+                catch (\Exception $e) {
+                    DB::rollback();
+                    CommonHelpers::LogSystemError('Orders', $e->getMessage());
+                    return back()->with(['message' => 'Order transaction failed', 'type' => 'error']);
+                }  
 
-                }else {
+            }else {
 
-                    $request->validate([
-                        'dp_receipt'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
-                    ]);
-                    
+                $request->validate([
+                    'dp_receipt'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
+                ]);
+
+                try{
                     $timestamp = now()->timestamp;
                         if ($request->hasFile('dp_receipt')) {
                             $file = $request->file('dp_receipt');
@@ -328,30 +334,37 @@ class OrdersController extends Controller
                         'verified_by_acctg' => CommonHelpers::myId(),
                         'verified_at_acctg' => now(),
                     ]);
-
+    
                     $orderData = $order->toArray();
                     $orderData['items'] = OrderLines::join('item_masters', 'item_masters.digits_code', '=', 'order_lines.digits_code')
                                             ->where('order_lines.order_id', $order->id)
                                             ->select('item_masters.item_description', 'order_lines.qty')
                                             ->get()
                                             ->toArray();
-
+    
                     Mail::to($order->email_address)->send(new OrderConfirmationMail($orderData));
-
+    
                     self::createDemTransaction($order->id);
-
+    
                     DB::commit();
                     return redirect('/orders')->with(['message' => 'Order Approve Success', 'type' => 'success']);
-
                 }
-
-            }else if ($order->status == Statuses::FOR_SCHEDULE) {
-
-                $request->validate([
-                    'schedule_date'     => 'required|date',
-                    'transaction_type'  => 'required|in:logistics,hand carry',
-                    'carrier_name' => 'required_if:transaction_type,hand carry'
-                ]);
+                catch (\Exception $e) {
+                    DB::rollback();
+                    CommonHelpers::LogSystemError('Orders', $e->getMessage());
+                    return back()->with(['message' => 'Order transaction failed', 'type' => 'error']);
+                }  
+            
+            }
+          
+        }else if ($order->status == Statuses::FOR_SCHEDULE) {
+            
+            $request->validate([
+                'schedule_date'     => 'required|date',
+                'transaction_type'  => 'required|in:logistics,hand carry',
+                'carrier_name' => 'required_if:transaction_type,hand carry'
+            ]);
+            try {
 
                 Orders::where('id', $request->order_id)->update([
                     'status' => Statuses::FOR_DELIVERY,
@@ -363,31 +376,52 @@ class OrdersController extends Controller
 
                 DB::commit();
                 return redirect('/orders')->with(['message' => 'Order Schedule Successful', 'type' => 'success']);
-                    
-            }else if ($order->status == Statuses::FOR_DELIVERY){
-               
-                $request->validate([
-                            'proof_of_delivery'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
-                        ]);
 
+            }
+            catch (\Exception $e) {
+                DB::rollback();
+                CommonHelpers::LogSystemError('Orders', $e->getMessage());
+                return back()->with(['message' => 'Order transaction failed', 'type' => 'error']);
+            }
+
+                
+        }else if ($order->status == Statuses::FOR_DELIVERY){
+            
+            $request->validate([
+                'proof_of_delivery'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
+            ]);
+
+            try{
                 $timestamp = now()->timestamp;
-                    if ($request->hasFile('proof_of_delivery')) {
-                        $file = $request->file('proof_of_delivery');
-                        $filename = $timestamp . '_' . $file->getClientOriginalName();
-                        $file->move(public_path('delivery/proof_of_delivery'), $filename);
-                    }        
+
+                if ($request->hasFile('proof_of_delivery')) {
+                    $file = $request->file('proof_of_delivery');
+                    $filename = $timestamp . '_' . $file->getClientOriginalName();
+                    $file->move(public_path('delivery/proof_of_delivery'), $filename);
+                }        
+
                 Orders::where('id', $request->order_id)->update([
-                        'status' => Statuses::TO_CLOSE,
-                        'proof_of_delivery' => $filename,
-                        'scheduled_by_logistics' => CommonHelpers::myId(),
-                        'scheduled_at_logistics' => now(),
+                    'status' => Statuses::TO_CLOSE,
+                    'proof_of_delivery' => $filename,
+                    'scheduled_by_logistics' => CommonHelpers::myId(),
+                    'scheduled_at_logistics' => now(),
                 ]);
 
-                 self::deductReservation($order->id);
+                self::deductReservation($order->id);
                     
                 DB::commit();
                 return redirect('/orders')->with(['message' => 'Order Delivery Success', 'type' => 'success']);
-            } else if ($order->status == Statuses::TO_CLOSE) {
+            }
+            catch (\Exception $e) {
+                DB::rollback();
+                CommonHelpers::LogSystemError('Orders', $e->getMessage());
+                return back()->with(['message' => 'Order transaction failed', 'type' => 'error']);
+            }
+
+
+        } else if ($order->status == Statuses::TO_CLOSE) {
+
+            try{
                 Orders::where('id', $request->order_id)->update([
                     'status' => Statuses::CLOSED,
                     'closed_by_ecomm' => CommonHelpers::myId(),
@@ -396,14 +430,13 @@ class OrdersController extends Controller
                 DB::commit();
                 return redirect('/orders')->with(['message' => 'Order Closed Successfully', 'type' => 'success']);
             }
-            
+            catch (\Exception $e) {
+                DB::rollback();
+                CommonHelpers::LogSystemError('Orders', $e->getMessage());
+                return back()->with(['message' => 'Order transaction failed', 'type' => 'error']);
+            }
         }
-        catch (\Exception $e) {
-            DB::rollback();
-            CommonHelpers::LogSystemError('Orders', $e->getMessage());
-            return back()->with(['message' => 'Order transaction failed', 'type' => 'error']);
-        }
-        
+       
     }
 
     public function deductReservation($orderId)
