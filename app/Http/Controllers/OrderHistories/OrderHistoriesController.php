@@ -6,6 +6,8 @@ use App\Helpers\CommonHelpers;
 use App\Http\Controllers\Controller;
 use App\Models\OrderHistory;
 use App\Models\OrderHistoryLines;
+use App\Models\OrderLines;
+use App\Models\Orders;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -21,14 +23,14 @@ class OrderHistoriesController extends Controller
     private $perPage;
 
     public function __construct() {
-        $this->sortBy = request()->get('sortBy', 'order_histories.id');
+        $this->sortBy = request()->get('sortBy', 'orders.id');
         $this->sortDir = request()->get('sortDir', 'desc');
         $this->perPage = request()->get('perPage', 10);
     }
 
      public function getAllData(){
  
-        $query = OrderHistory::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy']);
+        $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy']);
 
         $filter = $query->searchAndFilter(request());
         $result = $filter->orderBy($this->sortBy, $this->sortDir);
@@ -53,11 +55,11 @@ class OrderHistoriesController extends Controller
     public function view ($id) {
         $data = [];
         $data['page_title'] = ' Order Details';
-        $data['order'] = OrderHistory::leftJoin('statuses', 'statuses.id', 'order_histories.status')
-            ->select('order_histories.*', 'statuses.name as status_name')
-            ->where('order_histories.id', $id)
+        $data['order'] = Orders::leftJoin('statuses', 'statuses.id', 'orders.status')
+            ->select('orders.*', 'statuses.name as status_name')
+            ->where('orders.id', $id)
             ->first();
-        $data['lines'] = OrderHistoryLines::leftJoin('item_masters', 'item_masters.digits_code', 'order_history_lines.digits_code')
+        $data['lines'] = OrderLines::leftJoin('item_masters', 'item_masters.digits_code', 'order_lines.digits_code')
         ->where('order_id', $id)->get();
         $data['my_privilege_id'] = CommonHelpers::myPrivilegeId();
  

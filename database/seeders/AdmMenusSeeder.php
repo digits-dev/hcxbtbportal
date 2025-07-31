@@ -102,6 +102,7 @@ class AdmMenusSeeder extends Seeder
                 'name'              => 'Order History',
                 'type'              => 'Route',
                 'path'              => 'OrderHistories\OrderHistoriesControllerGetIndex',
+                'slug'              => 'order_histories',
                 'icon'              => 'fa-solid fa-clock-rotate-left',
                 'parent_id'         => 0,
                 'is_active'         => 1,
