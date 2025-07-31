@@ -57,8 +57,8 @@ class OrdersExport implements FromCollection, WithHeadings, WithMapping, ShouldA
                     $line->getItem->model ?? '',
                     $line->getItem->actual_color ?? '',
                     $line->getItem->size ?? '',
-                    $line->getItem->serial_no ?? '',
-                    $line->getItem->imei ?? '',
+                    $line->serial_no ?? '',
+                    $line->imei ?? '',
                     $line->qty ?? '',
 
                 ]);
