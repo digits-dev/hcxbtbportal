@@ -203,6 +203,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('item_inventories')->group(function () {
         Route::get('/export', [ItemInventoriesController::class, 'export']);
         Route::post('/check-inventory/{digits_code}', [ItemInventoriesController::class, 'checkInventory']);
+        Route::get('/inventory_details/{id}', [ItemInventoriesController::class, 'inventoryDetails']);
     });
 
     Route::prefix('item_masters')->group(function () {

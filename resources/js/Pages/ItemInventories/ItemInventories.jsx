@@ -76,6 +76,13 @@ const ItemInventories = ({page_title, queryParams, item_inventories}) => {
                 <TableContainer data={item_inventories?.data}>
                     <Thead>
                         <Row>
+                             <TableHeader
+                                sortable={false}
+                                width="md"
+                                justify="center"
+                            >
+                                Action
+                            </TableHeader>
                             <TableHeader
                                 name="digits_code"
                                 queryParams={queryParams}
@@ -124,6 +131,13 @@ const ItemInventories = ({page_title, queryParams, item_inventories}) => {
                         {item_inventories &&
                             item_inventories?.data.map((item, index) => (
                                 <Row key={item.id}>
+                                    <RowData center>
+                                        <RowAction
+                                            type="link"
+                                            action="view"
+                                            href={`item_inventories/inventory_details/${item.id}`}
+                                        />
+                                    </RowData>
                                     <RowData>
                                         {item?.get_item?.digits_code ?? '-'}
                                     </RowData>

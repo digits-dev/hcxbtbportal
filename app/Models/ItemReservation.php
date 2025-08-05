@@ -18,4 +18,8 @@ class ItemReservation extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function getOrder(){
+        return $this->belongsTo(Orders::class,'order_id', 'id');
+    }
 }

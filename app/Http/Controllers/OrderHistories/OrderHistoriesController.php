@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\OrderHistories;
 
+use App\Exports\OrdersExport;
 use App\Helpers\CommonHelpers;
 use App\Http\Controllers\Controller;
 use App\Models\OrderHistory;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
 use Inertia\Response;
 use DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class OrderHistoriesController extends Controller
 {
@@ -65,4 +67,11 @@ class OrderHistoriesController extends Controller
  
         return Inertia::render("OrderHistories/ViewOrderHistoryDetails", $data);
     } 
+
+    public function export(){
+        $filename = "Order History - " . date ('Y-m-d H:i:s');
+        $query = self::getAllData();
+
+        return Excel::download(new OrdersExport($query), $filename . '.xlsx');
+    }
 }

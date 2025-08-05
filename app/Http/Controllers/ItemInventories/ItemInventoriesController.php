@@ -50,6 +50,18 @@ class ItemInventoriesController extends Controller
         return Inertia::render("ItemInventories/ItemInventories", $data);
     }
 
+    public function inventoryDetails($id){
+        $data = [];
+        $data['page_title'] = 'Inventory Details';
+        $data['inventory_details'] = ItemInventory::with(['getItem','getReserveItem' => function ($query) {
+            $query->where('status', 'reserved')
+                ->orderBy('created_at', 'desc');
+        },
+        'getReserveItem.getOrder.getStatus'])->find($id);
+
+        return Inertia::render("ItemInventories/ItemInventoryDetails", $data);
+    }
+
     public function export()
     {
 

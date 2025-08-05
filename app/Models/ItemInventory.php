@@ -145,4 +145,8 @@ class ItemInventory extends Model
     public function getItem() {
         return $this->belongsTo(ItemMaster::class, 'digits_code', 'digits_code');
     }
+
+    public function getReserveItem() {
+        return $this->hasMany(ItemReservation::class, 'digits_code', 'digits_code');
+    }
 }
