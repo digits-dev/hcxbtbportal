@@ -41,7 +41,9 @@ class OrdersController extends Controller
     }
 
     public function getAllData(){
-        if (CommonHelpers::myPrivilegeId() == AdmPrivileges::ACCOUNTING) {
+        if (CommonHelpers::myPrivilegeId() == AdmPrivileges::HOMECREDITSTAFF) {
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy', 'getLines.getItem'])->where('created_by', CommonHelpers::myId());
+        }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::ACCOUNTING) {
             $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy', 'getLines.getItem'])->whereIn('status',[Statuses::FOR_VERIFICATION]);
         }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::LOGISTICS){
             $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy', 'getLines.getItem'])->whereIn('status',[Statuses::FOR_SCHEDULE, Statuses::FOR_DELIVERY]);
@@ -132,9 +134,9 @@ class OrdersController extends Controller
             }
 
             if ($validatedData['has_downpayment'] === 'yes') {
-                $status = Statuses::FOR_UPLOADING;
+                $status = Statuses::FOR_PAYMENT;
             } else {
-                $status =  Statuses::CONFIRMED;
+                $status =  Statuses::ORDER_PROCESSING;
             };
 
             // Prepare order data
@@ -190,6 +192,7 @@ class OrdersController extends Controller
  
             if ($validatedData['has_downpayment'] === 'yes') {
                 Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
+                    'reference_number' => $order->reference_number,
                     'customer_name' => $validatedData['first_name'] . " " .$validatedData['last_name'],
                     'payment_link'  => url('/upload/' . $encryptedId),
                 ]));
@@ -270,6 +273,7 @@ class OrdersController extends Controller
         
 
     public function updateSave(Request $request) {
+        dd($request->all());
 
         DB::beginTransaction();
     
@@ -289,11 +293,11 @@ class OrdersController extends Controller
                 $existingRejectedProofs[] = $order->payment_proof;
             }
                 
-            if ($request->action == 'reject') {
+            if ($request->action == 'incomplete') {
 
                 try{
                     Orders::where('id', $request->order_id)->update([
-                        'status' => Statuses::REJECTED,
+                        'status' => Statuses::INCOMPLETE,
                         'rejected_payment_proof' => implode(',', $existingRejectedProofs),
                         'payment_proof' => null,
                         'rejected_by' => CommonHelpers::myId(),
@@ -303,6 +307,7 @@ class OrdersController extends Controller
                     $encryptedId = Crypt::encryptString($order->id);
     
                     Mail::to($order->email_address)->send(new ReSendProofOfPaymentLink([
+                        'reference_number' => $order->reference_number,
                         'customer_name' => $order->first_name." ".$order->last_name,
                         'payment_link' => url('/upload/' . $encryptedId),
                     ]));
@@ -331,7 +336,7 @@ class OrdersController extends Controller
                         }
                 
                     Orders::where('id', $request->order_id)->update([
-                        'status' => Statuses::CONFIRMED,
+                        'status' => Statuses::ORDER_PROCESSING,
                         'dp_receipt' => $filename,
                         'verified_by_acctg' => CommonHelpers::myId(),
                         'verified_at_acctg' => now(),
@@ -363,8 +368,8 @@ class OrdersController extends Controller
             
             $request->validate([
                 'schedule_date'     => 'required|date',
-                'transaction_type'  => 'required|in:logistics,hand carry',
-                'carrier_name' => 'required_if:transaction_type,hand carry'
+                'transaction_type'  => 'required|in:logistics,third party',
+                'carrier_name' => 'required_if:transaction_type,third party'
             ]);
             try {
 
@@ -372,6 +377,7 @@ class OrdersController extends Controller
                     'status' => Statuses::FOR_DELIVERY,
                     'schedule_date' => $request->schedule_date,
                     'transaction_type' => $request->transaction_type,
+                    'carrier_name' => $request->carrier_name,
                     'scheduled_by_logistics' => CommonHelpers::myId(),
                     'scheduled_at_logistics' => now(),
                 ]);
@@ -446,22 +452,10 @@ class OrdersController extends Controller
         $reservations = ItemReservation::where('order_id', $orderId)
                         ->where('status', 'reserved')
                         ->get();
-        if ($reservations->isEmpty()) {
-            return response()->json(['message' => 'No reserved items found for this order.'], 404);
-        }
-
+  
         foreach ($reservations as $reservation) {
             $item = ItemInventory::where('digits_code', $reservation->digits_code)->first();
 
-            if (!$item) {
-                return response()->json(['message' => "Item with code {$reservation->digits_code} not found."], 404);
-            }
-
-            // if ($item->reserved_qty < $reservation->quantity || $item->qty < $reservation->quantity) {
-            //     return response()->json([
-            //         'message' => "Inventory inconsistency for item {$reservation->digits_code}.",
-            //     ], 400);
-            // }
 
             // Deduct from stock and reserved
             $item->qty -= $reservation->quantity;
@@ -541,7 +535,9 @@ class OrdersController extends Controller
             'billing_full_name'        => $headerDatas->first_name ." ". $headerDatas->last_name,
             'shipping_full_name'       => $headerDatas->first_name ." ". $headerDatas->last_name,
             'created_by'               => 1000, //DEM Creator
-		    'created_at'               => date('Y-m-d H:i:s')
+		    'created_at'               => date('Y-m-d H:i:s'),
+            'order_created'            => $headerDatas->created_at,
+            'payment_method'           => $headerDatas->payment_method ?? null
         ]);
 
         foreach($orderLinesDatas ?? [] as $key => $val){

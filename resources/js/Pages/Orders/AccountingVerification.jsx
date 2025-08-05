@@ -18,6 +18,7 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
         order_id: order.id,
         dp_receipt: "",
         action: "",
+        reason: "",
     });
 
     const handleFileUpload = (e) => {
@@ -30,34 +31,80 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        Swal.fire({
-            title: `<p class="font-nunito-sans" >Are you sure that you want to ${
-                data.action == "approve" ? "approve" : "reject"
-            } this?</p>`,
-            showCancelButton: true,
-            confirmButtonText: `${
-                data.action == "approve" ? "Approve" : "Reject"
-            } Order`,
-            confirmButtonColor: `${
-                data.action == "approve" ? "#05df72" : "#fb2c36"
-            }`,
-            icon: "question",
-            iconColor: buttonSwalColor,
-            reverseButtons: true,
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                post("/orders/update_save", {
-                    onSuccess: (data) => {
-                        const { message, type } = data.props.auth.sessions;
-                        handleToast(message, type);
-                    },
-                    onError: (data) => {
-                        const { message, type } = data.props.auth.sessions;
-                        handleToast(message, type);
-                    },
-                });
-            }
-        });
+
+        if (data.action === "incomplete") {
+            Swal.fire({
+                title: "Enter Reason",
+                html: `
+                <label for="custom-reason" class="swal2-label">Reason for marking as incomplete</label>
+                <textarea id="custom-reason" class="swal2-textarea" placeholder="Type your reason here..."></textarea>
+            `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: "Submit",
+                confirmButtonColor: "#fb2c36",
+                preConfirm: function () {
+                    const reason = document
+                        .getElementById("custom-reason")
+                        .value.trim();
+                    if (!reason) {
+                        Swal.showValidationMessage("Reason is required!");
+                        return false;
+                    }
+                    return reason;
+                },
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    const reason = result.value;
+                    setData("reason", reason);
+
+                    setTimeout(() => {
+                        console.log("Updated reason:", data.reason); // 👈 Check if updated
+                    }, 0);
+
+                    // Delay just enough to let `setData` register before posting
+                    setTimeout(() => {
+                        post("/orders/update_save", {
+                            onSuccess: (data) => {
+                                const { message, type } =
+                                    data.props.auth.sessions;
+                                handleToast(message, type);
+                            },
+                            onError: (data) => {
+                                const { message, type } =
+                                    data.props.auth.sessions;
+                                handleToast(message, type);
+                            },
+                        });
+                    }, 1000);
+                } else {
+                    console.log("User cancelled or dismissed");
+                }
+            });
+        } else {
+            Swal.fire({
+                title: `<p class="font-nunito-sans">Are you sure you want to complete this?</p>`,
+                showCancelButton: true,
+                confirmButtonText: "Complete Order",
+                confirmButtonColor: "#05df72",
+                icon: "question",
+                iconColor: buttonSwalColor,
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    post("/orders/update_save", {
+                        onSuccess: (data) => {
+                            const { message, type } = data.props.auth.sessions;
+                            handleToast(message, type);
+                        },
+                        onError: (data) => {
+                            const { message, type } = data.props.auth.sessions;
+                            handleToast(message, type);
+                        },
+                    });
+                }
+            });
+        }
     };
 
     return (
@@ -83,7 +130,7 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            Approved
+                                            {order.status_name}
                                         </span>
                                     </div>
                                 </div>
@@ -602,20 +649,26 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                             <button
                                                 type="submit"
                                                 onClick={() =>
-                                                    setData("action", "reject")
+                                                    setData(
+                                                        "action",
+                                                        "incomplete"
+                                                    )
                                                 }
                                                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:brightness-90"
                                             >
-                                                Reject
+                                                Incomplete
                                             </button>
                                             <button
                                                 type="submit"
                                                 onClick={() =>
-                                                    setData("action", "approve")
+                                                    setData(
+                                                        "action",
+                                                        "complete"
+                                                    )
                                                 }
                                                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:brightness-90"
                                             >
-                                                Approve
+                                                Complete
                                             </button>
                                         </div>
                                     </div>
