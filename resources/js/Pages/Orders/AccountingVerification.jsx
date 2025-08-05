@@ -6,6 +6,10 @@ import LoginInputTooltip from "../../Components/Tooltip/LoginInputTooltip";
 import { useTheme } from "../../Context/ThemeContext";
 import useThemeStyles from "../../Hooks/useThemeStyles";
 import { useToast } from "../../Context/ToastContext";
+import Modalv2 from "../../Components/Modal/Modalv2";
+import TextArea from "../../Components/Forms/TextArea";
+import Modal from "../../Components/Modal/Modal";
+import Button from "../../Components/Table/Buttons/Button";
 
 const AccoutingVerification = ({ page_title, order, lines }) => {
     const { handleToast } = useToast();
@@ -13,7 +17,7 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
     const { primayActiveColor, textColorActive, buttonSwalColor } =
         useThemeStyles(theme);
     const [uploadedFile, setUploadedFile] = useState(null);
-
+    const [openModal, setOpenModal] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         order_id: order.id,
         dp_receipt: "",
@@ -29,57 +33,23 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
         setData("dp_receipt", file);
     };
 
+    const handleModalToggle = () => {
+        setOpenModal(!openModal);
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
         if (data.action === "incomplete") {
-            Swal.fire({
-                title: "Enter Reason",
-                html: `
-                <label for="custom-reason" class="swal2-label">Reason for marking as incomplete</label>
-                <textarea id="custom-reason" class="swal2-textarea" placeholder="Type your reason here..."></textarea>
-            `,
-                focusConfirm: false,
-                showCancelButton: true,
-                confirmButtonText: "Submit",
-                confirmButtonColor: "#fb2c36",
-                preConfirm: function () {
-                    const reason = document
-                        .getElementById("custom-reason")
-                        .value.trim();
-                    if (!reason) {
-                        Swal.showValidationMessage("Reason is required!");
-                        return false;
-                    }
-                    return reason;
+            post("/orders/update_save", {
+                onSuccess: (data) => {
+                    const { message, type } = data.props.auth.sessions;
+                    handleToast(message, type);
                 },
-            }).then(function (result) {
-                if (result.isConfirmed) {
-                    const reason = result.value;
-                    setData("reason", reason);
-
-                    setTimeout(() => {
-                        console.log("Updated reason:", data.reason); // 👈 Check if updated
-                    }, 0);
-
-                    // Delay just enough to let `setData` register before posting
-                    setTimeout(() => {
-                        post("/orders/update_save", {
-                            onSuccess: (data) => {
-                                const { message, type } =
-                                    data.props.auth.sessions;
-                                handleToast(message, type);
-                            },
-                            onError: (data) => {
-                                const { message, type } =
-                                    data.props.auth.sessions;
-                                handleToast(message, type);
-                            },
-                        });
-                    }, 1000);
-                } else {
-                    console.log("User cancelled or dismissed");
-                }
+                onError: (data) => {
+                    const { message, type } = data.props.auth.sessions;
+                    handleToast(message, type);
+                },
             });
         } else {
             Swal.fire({
@@ -647,12 +617,14 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                         </button>
                                         <div className="flex gap-3">
                                             <button
-                                                type="submit"
-                                                onClick={() =>
-                                                    setData(
-                                                        "action",
-                                                        "incomplete"
-                                                    )
+                                                type="button"
+                                                onClick={() =>{
+                                                      handleModalToggle();
+                                                      setData(
+                                                          "action",
+                                                          "incomplete"
+                                                      )
+                                                }
                                                 }
                                                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:brightness-90"
                                             >
@@ -660,11 +632,12 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                             </button>
                                             <button
                                                 type="submit"
-                                                onClick={() =>
+                                                onClick={() =>{
                                                     setData(
                                                         "action",
                                                         "complete"
-                                                    )
+                                                    );
+                                                }
                                                 }
                                                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:brightness-90"
                                             >
@@ -678,6 +651,10 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                     </div>
                 </ContentPanel>
             </form>
+            <Modal show={openModal} onClose={handleModalToggle} title='Incomplete Reason' fontColor={`text-white`}>
+                <TextArea name='reason' onChange={(e)=>{setData('reason',e.target.value)}}></TextArea>
+                <Button onClick={handleSubmit} type="button" extendClass={`${theme} text-white mt-3 float-right`}> Submit</Button>
+            </Modal>
         </>
     );
 };
