@@ -6,9 +6,10 @@ import ChangePassModal from "../../Components/Modal/ChangePassModal";
 import EmbeddedDashboard from "./EmbeddedDashboard";
 import DashboardNotAvailable from "./DashboardNotAvailable";
 import AnnouncementModal from "../../Components/Modal/AnnouncementsModal";
+import DashboardContent from "./DashboardContent";
 
 
-const Dashboard = ({dashboard_settings_data, embedded_dashboards }) => {
+const Dashboard = ({dashboard_settings_data, embedded_dashboards , order_chart, statuses_count}) => {
     const { auth } = usePage().props;
     const { theme } = useTheme();
     const { textColor, sideBarBgColor } = useThemeStyles(theme);
@@ -24,7 +25,7 @@ const Dashboard = ({dashboard_settings_data, embedded_dashboards }) => {
             {auth.access.isView && auth.access.isRead && 
                 <div className="space-y-3">
                     {dashboard_settings_data.has_default_dashboard == 'Yes' && 
-                        <>Dashboard Here</>
+                        <DashboardContent chartValues={order_chart} statusesValues={statuses_count}/>
                     }
                     {dashboard_settings_data.has_embedded_dashboard == 'Yes' && 
                        <EmbeddedDashboard embedded_dashboards={embedded_dashboards}/>
