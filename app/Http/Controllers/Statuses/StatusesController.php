@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Statuses;
 
+use App\Exports\SubmasterExport;
 use App\Helpers\CommonHelpers;
 use App\Http\Controllers\Controller;
 use App\Models\Statuses;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
-
+use Maatwebsite\Excel\Facades\Excel;
 
 class StatusesController extends Controller
 {
@@ -118,5 +119,35 @@ class StatusesController extends Controller
             CommonHelpers::LogSystemError('Statuses', $e->getMessage());
             return back()->with(['message' => 'Status Updating Failed!', 'type' => 'error']);
         }
+    }
+
+
+       public function export()
+    {
+
+        $headers = [
+            'Status Name',
+            'Color',
+            'Status',
+            'Created By',
+            'Updated By',
+            'Created Date',
+            'Updated Date',
+        ];
+
+        $columns = [
+            'name',
+            'color',
+            'status',
+            'getCreatedBy.name',
+            'getUpdatedBy.name',
+            'created_at',
+            'updated_at',
+        ];
+
+        $filename = "Statuses - " . date ('Y-m-d H:i:s');
+        $query = self::getAllData();
+        return Excel::download(new SubmasterExport($query, $headers, $columns), $filename . '.xlsx');
+
     }
 }

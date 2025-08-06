@@ -21,6 +21,7 @@ use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Deliveries\DeliveriesController;
 use App\Http\Controllers\ItemInventories\ItemInventoriesController;
 use App\Http\Controllers\ItemMasters\ItemMastersController;
+use App\Http\Controllers\ModeOfPayments\ModeOfPaymentsController;
 use App\Http\Controllers\OrderHistories\OrderHistoriesController;
 use App\Http\Controllers\Users\ChangePasswordController;
 use App\Http\Controllers\Users\ProfilePageController;
@@ -217,6 +218,13 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('statuses')->group(function () {
         Route::post('/create', [StatusesController::class, 'create']);
         Route::post('/update', [StatusesController::class, 'update']);
+        Route::get('/export', [StatusesController::class, 'export']);
+    });
+
+    Route::prefix('mode_of_payments')->group(function () {
+        Route::post('/create', [ModeOfPaymentsController::class, 'create']);
+        Route::post('/update', [ModeOfPaymentsController::class, 'update']);
+        Route::get('/export', [ModeOfPaymentsController::class, 'export']);
     });
 
     Route::prefix('order_histories')->group(function () {

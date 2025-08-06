@@ -85,7 +85,7 @@ class AdmMenusSeeder extends Seeder
                 'is_active'         => 1,
                 'is_dashboard'      => 1,
                 'id_adm_privileges' => 1,
-                'sorting'           => 4
+                'sorting'           => 5
             ],
             [
                 'name'              => 'Submaster',
@@ -105,6 +105,18 @@ class AdmMenusSeeder extends Seeder
                 'slug'              => 'order_histories',
                 'icon'              => 'fa-solid fa-clock-rotate-left',
                 'parent_id'         => 0,
+                'is_active'         => 1,
+                'is_dashboard'      => 1,
+                'id_adm_privileges' => 1,
+                'sorting'           => 4
+            ],
+            [
+                'name'              => 'Mode of Payments',
+                'type'              => 'Route',
+                'path'              => 'fa-solid fa-money-bill',
+                'slug'              => 'mode_of_payments',
+                'icon'              => 'fa-solid fa-clock-rotate-left',
+                'parent_id'         => 7,
                 'is_active'         => 1,
                 'is_dashboard'      => 1,
                 'id_adm_privileges' => 1,

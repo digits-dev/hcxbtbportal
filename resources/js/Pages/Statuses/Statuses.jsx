@@ -95,7 +95,7 @@ const Statuses = ({page_title, queryParams, statuses}) => {
                                 <i className="fa-solid fa-plus mr-1"></i> Add Status
                             </Button>
                         }
-                        <Export path="/item_masters/export" page_title={page_title}/>
+                        <Export path="/statuses/export" page_title={page_title}/>
                     </div>
                     <div className="flex">
                         <CustomFilter>

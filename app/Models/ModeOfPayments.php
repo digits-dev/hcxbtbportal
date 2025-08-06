@@ -20,8 +20,8 @@ class ModeOfPayments extends Model
 
     protected $fillable = [
         'id',
-        'name',
-        'color',
+        'payment_name',
+        'status',
         'created_by',
         'updated_by',
         'created_at',
@@ -29,8 +29,8 @@ class ModeOfPayments extends Model
     ];
 
     protected $filterable = [
-        'name',
-        'color',
+        'payment_name',
+        'status',
         'created_by',
         'updated_by',
         'created_at',

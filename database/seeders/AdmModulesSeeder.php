@@ -198,6 +198,16 @@ class AdmModulesSeeder extends Seeder
                 'is_active' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
             ],
+            [
+                'name' => 'Mode of Payments',
+                'icon' => 'fa-solid fa-money-bill',
+                'path' => 'mode_of_payments',
+                'table_name' => 'mode_of_payments',
+                'controller' => 'ModeOfPayments\ModeOfPaymentsController',
+                'is_protected' => 0,
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+            ],
 
         ];
 

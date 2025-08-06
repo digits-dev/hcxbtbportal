@@ -22,6 +22,7 @@ class Statuses extends Model
         'id',
         'name',
         'color',
+        'status',
         'created_by',
         'updated_by',
         'created_at',
@@ -31,6 +32,7 @@ class Statuses extends Model
     protected $filterable = [
         'name',
         'color',
+        'status',
         'created_by',
         'updated_by',
         'created_at',
