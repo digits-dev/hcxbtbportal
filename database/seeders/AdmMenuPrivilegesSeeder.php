@@ -55,7 +55,7 @@ class AdmMenuPrivilegesSeeder extends Seeder
         ];
 
         foreach ($menus as $menu) {
-            admMenusPrivileges::updateOrCreate(
+            AdmMenusPrivileges::updateOrCreate(
                 [
                     'id_adm_menus' => $menu['id_adm_menus'],
                     'id_adm_privileges' => $menu['id_adm_privileges'],
