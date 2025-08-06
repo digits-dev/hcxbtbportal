@@ -62,5 +62,6 @@ class AdmMenuPrivilegesSeeder extends Seeder
                 ]
             );
         }
+        
     }
 }
