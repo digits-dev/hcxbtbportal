@@ -656,6 +656,7 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                 fontColor={`text-white`}
             >
                 <TextArea
+                    rows={4}
                     name="reason"
                     onChange={(e) => {
                         setData("reason", e.target.value);

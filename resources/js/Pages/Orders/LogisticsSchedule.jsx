@@ -144,9 +144,6 @@ const LogisticsSchedule = ({ page_title, order, lines }) => {
                                                             Description
                                                         </th>
                                                         <th className="px-4 py-2 font-medium text-gray-600">
-                                                            Model
-                                                        </th>
-                                                        <th className="px-4 py-2 font-medium text-gray-600">
                                                             Color
                                                         </th>
                                                         <th className="px-4 py-2 font-medium text-gray-600">
@@ -154,6 +151,12 @@ const LogisticsSchedule = ({ page_title, order, lines }) => {
                                                         </th>
                                                         <th className="px-4 py-2 font-medium text-gray-600">
                                                             Qty
+                                                        </th>
+                                                        <th className="px-4 py-2 font-medium text-gray-600">
+                                                            Serial
+                                                        </th>
+                                                        <th className="px-4 py-2 font-medium text-gray-600">
+                                                            IMEI
                                                         </th>
                                                     </tr>
                                                 </thead>
@@ -170,9 +173,6 @@ const LogisticsSchedule = ({ page_title, order, lines }) => {
                                                                     }
                                                                 </td>
                                                                 <td className="px-4 py-2 text-gray-900">
-                                                                    {item.model}
-                                                                </td>
-                                                                <td className="px-4 py-2 text-gray-900">
                                                                     {
                                                                         item.actual_color
                                                                     }
@@ -182,6 +182,14 @@ const LogisticsSchedule = ({ page_title, order, lines }) => {
                                                                 </td>
                                                                 <td className="px-4 py-2 text-gray-900">
                                                                     {item.qty}
+                                                                </td>
+                                                                <td className="px-4 py-2 text-gray-900">
+                                                                    {
+                                                                        item.serial_no
+                                                                    }
+                                                                </td>
+                                                                <td className="px-4 py-2 text-gray-900">
+                                                                    {item.imei}
                                                                 </td>
                                                             </tr>
                                                         )

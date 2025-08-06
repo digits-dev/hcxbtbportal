@@ -273,7 +273,6 @@ class OrdersController extends Controller
         
 
     public function updateSave(Request $request) {
-        dd($request->all());
 
         DB::beginTransaction();
     
@@ -300,6 +299,7 @@ class OrdersController extends Controller
                         'status' => Statuses::INCOMPLETE,
                         'rejected_payment_proof' => implode(',', $existingRejectedProofs),
                         'payment_proof' => null,
+                        'incomplete_reason' => $request->reason,
                         'rejected_by' => CommonHelpers::myId(),
                         'rejected_at' => now(),
                     ]);
@@ -308,6 +308,7 @@ class OrdersController extends Controller
     
                     Mail::to($order->email_address)->send(new ReSendProofOfPaymentLink([
                         'reference_number' => $order->reference_number,
+                        'incomplete_reason' => $request->reason,
                         'customer_name' => $order->first_name." ".$order->last_name,
                         'payment_link' => url('/upload/' . $encryptedId),
                     ]));
@@ -369,7 +370,8 @@ class OrdersController extends Controller
             $request->validate([
                 'schedule_date'     => 'required|date',
                 'transaction_type'  => 'required|in:logistics,third party',
-                'carrier_name' => 'required_if:transaction_type,third party'
+                'carrier_name' => 'required_if:transaction_type,third party',
+                'delivery_reference' => 'required_if:transaction_type,third party'
             ]);
             try {
 
@@ -378,6 +380,8 @@ class OrdersController extends Controller
                     'schedule_date' => $request->schedule_date,
                     'transaction_type' => $request->transaction_type,
                     'carrier_name' => $request->carrier_name,
+                    'delivery_reference' => $request->delivery_reference,
+                    'logistics_remarks' => $request->logistics_remarks,
                     'scheduled_by_logistics' => CommonHelpers::myId(),
                     'scheduled_at_logistics' => now(),
                 ]);

@@ -151,9 +151,6 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                                             Description
                                                         </th>
                                                         <th className="px-4 py-2 font-medium text-gray-600">
-                                                            Model
-                                                        </th>
-                                                        <th className="px-4 py-2 font-medium text-gray-600">
                                                             Color
                                                         </th>
                                                         <th className="px-4 py-2 font-medium text-gray-600">
@@ -161,6 +158,12 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                                         </th>
                                                         <th className="px-4 py-2 font-medium text-gray-600">
                                                             Qty
+                                                        </th>
+                                                        <th className="px-4 py-2 font-medium text-gray-600">
+                                                            Serial
+                                                        </th>
+                                                        <th className="px-4 py-2 font-medium text-gray-600">
+                                                            IMEI
                                                         </th>
                                                     </tr>
                                                 </thead>
@@ -177,9 +180,6 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                                                     }
                                                                 </td>
                                                                 <td className="px-4 py-2 text-gray-900">
-                                                                    {item.model}
-                                                                </td>
-                                                                <td className="px-4 py-2 text-gray-900">
                                                                     {
                                                                         item.actual_color
                                                                     }
@@ -189,6 +189,14 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                                                 </td>
                                                                 <td className="px-4 py-2 text-gray-900">
                                                                     {item.qty}
+                                                                </td>
+                                                                <td className="px-4 py-2 text-gray-900">
+                                                                    {
+                                                                        item.serial_no
+                                                                    }
+                                                                </td>
+                                                                <td className="px-4 py-2 text-gray-900">
+                                                                    {item.imei}
                                                                 </td>
                                                             </tr>
                                                         )
@@ -204,23 +212,6 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                                 Schedule Information
                                             </h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {/* Customer Name */}
-                                                <div className="space-y-1">
-                                                    <label className="block text-sm font-medium text-gray-700">
-                                                        Schedule Date
-                                                    </label>
-                                                    <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
-                                                        {
-                                                            new Date(
-                                                                order.schedule_date
-                                                            )
-                                                                .toISOString()
-                                                                .split("T")[0]
-                                                        }
-                                                    </div>
-                                                </div>
-
-                                                {/* Email Address */}
                                                 <div className="space-y-1">
                                                     <label className="block text-sm font-medium text-gray-700">
                                                         Delivery Option
@@ -231,6 +222,22 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                                             ? "Third Party"
                                                             : "Logistics"}
                                                     </div>
+
+                                                    {order.logistics_remarks &&
+                                                        order.transaction_type ==
+                                                            "logistics" && (
+                                                            <>
+                                                                <label className="block text-sm font-medium text-gray-700">
+                                                                    Remarks
+                                                                </label>
+
+                                                                <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900 whitespace-pre-line">
+                                                                    {
+                                                                        order.logistics_remarks
+                                                                    }
+                                                                </div>
+                                                            </>
+                                                        )}
 
                                                     {order.carrier_name &&
                                                         order.transaction_type ==
@@ -244,8 +251,31 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                                                         order.carrier_name
                                                                     }
                                                                 </div>
+                                                                <label className="block text-sm font-medium text-gray-700">
+                                                                    Delivery
+                                                                    Reference
+                                                                </label>
+                                                                <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
+                                                                    {
+                                                                        order.delivery_reference
+                                                                    }
+                                                                </div>
                                                             </>
                                                         )}
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="block text-sm font-medium text-gray-700">
+                                                        Schedule Date
+                                                    </label>
+                                                    <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
+                                                        {
+                                                            new Date(
+                                                                order.schedule_date
+                                                            )
+                                                                .toISOString()
+                                                                .split("T")[0]
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -362,7 +392,7 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                             type="submit"
                                             className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:brightness-90"
                                         >
-                                            Deliver
+                                            Delivered
                                         </button>
                                     </div>
                                 </div>
