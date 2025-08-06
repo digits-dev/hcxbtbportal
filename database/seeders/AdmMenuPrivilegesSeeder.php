@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\AdmModels\admMenusPrivileges;
+use App\Models\AdmModels\AdmMenusPrivileges;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
