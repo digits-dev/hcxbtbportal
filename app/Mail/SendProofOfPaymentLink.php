@@ -25,10 +25,10 @@ class SendProofOfPaymentLink extends Mailable
     /**
      * Get the message envelope.
      */
-    public function envelope(): Envelope
+   public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Proof Of Payment Link',
+            subject: 'Home Credit: ' . $this->order['reference_number'] . ' - Proof Of Payment',
         );
     }
 

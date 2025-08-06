@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
 use Inertia\Response;
 use DB;
+use App\Models\AdmModels\AdmPrivileges;
 use Maatwebsite\Excel\Facades\Excel;
 
 class OrderHistoriesController extends Controller
@@ -31,8 +32,12 @@ class OrderHistoriesController extends Controller
     }
 
      public function getAllData(){
- 
-        $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy']);
+         if (CommonHelpers::myPrivilegeId() == AdmPrivileges::HOMECREDITSTAFF) {
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy', 'getLines.getItem'])->where('created_by', CommonHelpers::myId());
+        }else {
+            $query = Orders::query()->with(['getStatus', 'getCreatedBy', 'getUpdatedBy']);
+
+        }
 
         $filter = $query->searchAndFilter(request());
         $result = $filter->orderBy($this->sortBy, $this->sortDir);
@@ -68,7 +73,7 @@ class OrderHistoriesController extends Controller
         return Inertia::render("OrderHistories/ViewOrderHistoryDetails", $data);
     } 
 
-    public function export(){
+       public function export(){
         $filename = "Order History - " . date ('Y-m-d H:i:s');
         $query = self::getAllData();
 

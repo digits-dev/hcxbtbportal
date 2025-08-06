@@ -28,7 +28,7 @@ class ReSendProofOfPaymentLink extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Re-upload Proof of Payment',
+            subject: 'Home Credit: ' . $this->order['reference_number'] . ' - Re-upload Proof of Payment',
         );
     }
 

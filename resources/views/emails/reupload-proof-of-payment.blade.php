@@ -56,7 +56,7 @@
             <p>We have reviewed your submitted proof of payment for your loan application with Home Credit. Unfortunately, it was not accepted due to missing or unclear details.</p>
             <p>Please re-upload a valid proof of payment using the link below so we can continue processing your application:</p>
             <p style="text-align: center;">
-                <a href="{{ $order['payment_link'] }}" class="button">Re-upload Proof of Payment</a>
+                <a style="color: #ffffff" href="{{ $order['payment_link'] }}" class="button">Re-upload Proof of Payment</a>
             </p>
             <p>Make sure your payment proof clearly shows the transaction details, amount paid, and reference number (if applicable). Our team will review it again after submission.</p>
             <p>If you have any questions or need assistance, feel free to reach out to us.</p>

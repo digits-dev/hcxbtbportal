@@ -14,14 +14,19 @@ const InputComponent = ({
     disabled,
     addClass,
     inputClass,
-    onError
+    onError,
+    min,
 }) => {
-    const {theme} = useTheme();
+    const { theme } = useTheme();
     return (
         <div className={addClass}>
             <label
                 htmlFor={name}
-                className={`block text-xs font-bold ${theme === 'bg-skin-black' ? ' text-gray-400' : 'text-gray-700'}  font-poppins`}
+                className={`block text-xs font-bold ${
+                    theme === "bg-skin-black"
+                        ? " text-gray-400"
+                        : "text-gray-700"
+                }  font-poppins`}
             >
                 {displayName || FormatLabelName(name)}
             </label>
@@ -31,20 +36,29 @@ const InputComponent = ({
                     type={type}
                     value={value}
                     name={name}
+                    min={min}
                     disabled={disabled}
                     onChange={onChange}
                     placeholder={placeholder}
-                    className={`${theme === 'bg-skin-black' ? theme+' text-gray-300 disabled:bg-skin-black' : 'bg-white'} mt-1 block w-full text-xs md:text-sm px-3 py-2 border disabled:bg-gray-100  ${onError ? 'border-red-600' : 'border-accent'} placeholder:text-sm focus:ring-[1.5px] focus:ring-black placeholder:text-gray-400  rounded-md shadow-sm focus:outline-none focus:border-black sm:text-sm ${inputClass}`}
+                    className={`${
+                        theme === "bg-skin-black"
+                            ? theme + " text-gray-300 disabled:bg-skin-black"
+                            : "bg-white"
+                    } mt-1 block w-full text-xs md:text-sm px-3 py-2 border disabled:bg-gray-100  ${
+                        onError ? "border-red-600" : "border-accent"
+                    } placeholder:text-sm focus:ring-[1.5px] focus:ring-black placeholder:text-gray-400  rounded-md shadow-sm focus:outline-none focus:border-black sm:text-sm ${inputClass}`}
                     checked={checked}
-                    style={type === "date" ? { padding: "7px", fontSize: "14px" } : {}}
+                    style={
+                        type === "date"
+                            ? { padding: "7px", fontSize: "14px" }
+                            : {}
+                    }
                 />
-                {onError && 
+                {onError && (
                     <LoginInputTooltip content={onError}>
-                    <i
-                        className="fa-solid fa-circle-info text-red-600 absolute cursor-pointer top-1/2 text-xs md:text-base right-1.5 md:right-3 transform -translate-y-1/2">
-                    </i>
+                        <i className="fa-solid fa-circle-info text-red-600 absolute cursor-pointer top-1/2 text-xs md:text-base right-1.5 md:right-3 transform -translate-y-1/2"></i>
                     </LoginInputTooltip>
-                }
+                )}
             </div>
         </div>
     );

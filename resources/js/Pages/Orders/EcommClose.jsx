@@ -330,18 +330,18 @@ const EcommClose = ({ page_title, order, lines }) => {
                                                 {/* Email Address */}
                                                 <div className="space-y-1">
                                                     <label className="block text-sm font-medium text-gray-700">
-                                                        Transaction Type
+                                                        Delivery Option
                                                     </label>
                                                     <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
                                                         {order.transaction_type ==
-                                                        "hand carry"
-                                                            ? "Hand Carry/Third Party"
+                                                        "third party"
+                                                            ? "Third Party"
                                                             : "Logistics"}
                                                     </div>
 
                                                     {order.carrier_name &&
                                                         order.transaction_type ==
-                                                            "hand carry" && (
+                                                            "third party" && (
                                                             <>
                                                                 <label className="block text-sm font-medium text-gray-700">
                                                                     Carrier Name

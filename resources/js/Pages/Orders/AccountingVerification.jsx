@@ -35,7 +35,7 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
 
     const handleModalToggle = () => {
         setOpenModal(!openModal);
-    }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -618,27 +618,25 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                         <div className="flex gap-3">
                                             <button
                                                 type="button"
-                                                onClick={() =>{
-                                                      handleModalToggle();
-                                                      setData(
-                                                          "action",
-                                                          "incomplete"
-                                                      )
-                                                }
-                                                }
+                                                onClick={() => {
+                                                    handleModalToggle();
+                                                    setData(
+                                                        "action",
+                                                        "incomplete"
+                                                    );
+                                                }}
                                                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:brightness-90"
                                             >
                                                 Incomplete
                                             </button>
                                             <button
                                                 type="submit"
-                                                onClick={() =>{
+                                                onClick={() => {
                                                     setData(
                                                         "action",
                                                         "complete"
                                                     );
-                                                }
-                                                }
+                                                }}
                                                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:brightness-90"
                                             >
                                                 Complete
@@ -651,9 +649,26 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                     </div>
                 </ContentPanel>
             </form>
-            <Modal show={openModal} onClose={handleModalToggle} title='Incomplete Reason' fontColor={`text-white`}>
-                <TextArea name='reason' onChange={(e)=>{setData('reason',e.target.value)}}></TextArea>
-                <Button onClick={handleSubmit} type="button" extendClass={`${theme} text-white mt-3 float-right`}> Submit</Button>
+            <Modal
+                show={openModal}
+                onClose={handleModalToggle}
+                title="Incomplete Reason"
+                fontColor={`text-white`}
+            >
+                <TextArea
+                    name="reason"
+                    onChange={(e) => {
+                        setData("reason", e.target.value);
+                    }}
+                ></TextArea>
+                <Button
+                    onClick={handleSubmit}
+                    type="button"
+                    extendClass={`${theme} text-white mt-3 float-right`}
+                >
+                    {" "}
+                    Submit
+                </Button>
             </Modal>
         </>
     );

@@ -9,10 +9,10 @@ class Statuses extends Model
 {
     use HasFactory;
 
-    Public const FOR_UPLOADING = 1;
+    Public const FOR_PAYMENT = 1;
     public const FOR_VERIFICATION = 2;
-    public const CONFIRMED = 3;
-    public const REJECTED = 4;
+    public const ORDER_PROCESSING = 3;
+    public const INCOMPLETE = 4;
     public const FOR_SCHEDULE = 5;
     public const FOR_DELIVERY = 6;
     public const TO_CLOSE = 7;

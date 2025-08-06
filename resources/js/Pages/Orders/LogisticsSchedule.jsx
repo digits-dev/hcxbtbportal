@@ -6,16 +6,20 @@ import InputComponent from "../../Components/Forms/Input";
 import { useTheme } from "../../Context/ThemeContext";
 import useThemeStyles from "../../Hooks/useThemeStyles";
 import { useToast } from "../../Context/ToastContext";
+import TextArea from "../../Components/Forms/TextArea";
 
 const LogisticsSchedule = ({ page_title, order, lines }) => {
     const { handleToast } = useToast();
     const { theme } = useTheme();
-    const { primayActiveColor, textColorActive, buttonSwalColor } = useThemeStyles(theme);
+    const { primayActiveColor, textColorActive, buttonSwalColor } =
+        useThemeStyles(theme);
     const { data, setData, post, processing, errors, reset } = useForm({
         order_id: order.id,
         schedule_date: "",
         transaction_type: "logistics",
         carrier_name: "",
+        delivery_reference: "",
+        logistics_remarks: "",
     });
 
     const handleSubmit = (e) => {
@@ -28,7 +32,7 @@ const LogisticsSchedule = ({ page_title, order, lines }) => {
             icon: "question",
             iconColor: buttonSwalColor,
             reverseButtons: true,
-            }).then((result) => {
+        }).then((result) => {
             if (result.isConfirmed) {
                 post("/orders/update_save", {
                     onSuccess: (data) => {
@@ -67,7 +71,7 @@ const LogisticsSchedule = ({ page_title, order, lines }) => {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            Approved
+                                            {order.status_name}
                                         </span>
                                     </div>
                                 </div>
@@ -119,64 +123,6 @@ const LogisticsSchedule = ({ page_title, order, lines }) => {
                                                 </label>
                                                 <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900 whitespace-pre-line">
                                                     {order.delivery_address}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Financial Information Section */}
-                                    <div className="bg-blue-50 p-4 rounded-lg">
-                                        <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                            Downpayment Details
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            {/* Downpayment Status */}
-                                            <div className="space-y-1">
-                                                <label className="block text-sm font-medium mb-2 text-gray-700">
-                                                    Downpayment
-                                                </label>
-                                                <span
-                                                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                                                        order.has_downpayment ==
-                                                        "yes"
-                                                            ? "bg-green-400 text-gray-700"
-                                                            : "bg-red-100 text-red-800"
-                                                    }`}
-                                                >
-                                                    {order.has_downpayment ==
-                                                    "yes" ? (
-                                                        <Check size={12} />
-                                                    ) : (
-                                                        <X size={12} />
-                                                    )}
-                                                    {order.has_downpayment ==
-                                                    "yes"
-                                                        ? "Yes"
-                                                        : "No"}
-                                                </span>
-                                            </div>
-
-                                            {/* Downpayment Value */}
-                                            {order.has_downpayment == "yes" && (
-                                                <div className="space-y-1">
-                                                    <label className="block text-sm font-medium text-gray-700">
-                                                        Downpayment Value
-                                                    </label>
-                                                    <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900 font-medium">
-                                                        {
-                                                            order.downpayment_value
-                                                        }
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Financed Amount */}
-                                            <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-gray-700">
-                                                    Financed Amount
-                                                </label>
-                                                <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900 font-medium">
-                                                    {order.financed_amount}
                                                 </div>
                                             </div>
                                         </div>
@@ -245,122 +191,137 @@ const LogisticsSchedule = ({ page_title, order, lines }) => {
                                         </div>
                                     </div>
 
-                                    {/* Contract Information Section */}
-                                    {order.approved_contract && (
-                                        <div className="bg-green-50 p-4 rounded-lg">
-                                            <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                                Contract Information
-                                            </h3>
-                                            <div className="bg-white border border-gray-200 rounded-lg p-4">
-                                                <div className="mb-4">
-                                                    {order.approved_contract.endsWith(
-                                                        ".pdf"
-                                                    ) ? (
-                                                        <iframe
-                                                            src={`/contract/uploaded-contract/${order.approved_contract}`}
-                                                            className="w-full h-96 border rounded"
-                                                            title="PDF Viewer"
-                                                        ></iframe>
-                                                    ) : (
-                                                        <img
-                                                            src={`/contract/uploaded-contract/${order.approved_contract}`}
-                                                            alt="Proof of Payment"
-                                                            className="max-w-full h-auto rounded"
-                                                        />
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <svg
-                                                        className="h-8 w-8 text-green-600"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                        />
-                                                    </svg>
-                                                    <div className="flex-1">
-                                                        <div className="font-medium text-gray-900">
-                                                            {order.approved_contract.substring(
-                                                                order.approved_contract.lastIndexOf(
-                                                                    "_"
-                                                                ) + 1
-                                                            )}
-                                                        </div>
-                                                        <div className="text-sm text-gray-500">
-                                                            Approved contract
-                                                            document
-                                                        </div>
-                                                    </div>
-                                                    <a
-                                                        href={`/contract/uploaded-contract/${order.approved_contract}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
-                                                    >
-                                                        View
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
                                     {/* Schedule Date */}
                                     <InputComponent
+                                        min={
+                                            new Date()
+                                                .toISOString()
+                                                .split("T")[0]
+                                        }
                                         type="date"
                                         name="schedule_date"
-                                        onChange={(e) =>setData("schedule_date",e.target.value)}
+                                        onChange={(e) =>
+                                            setData(
+                                                "schedule_date",
+                                                e.target.value
+                                            )
+                                        }
                                         onError={errors.schedule_date}
                                     />
 
-                                    {/* Transaction Type */}
-                                    <div className='mt-2'>
-                                        <label className={`block text-xs font-bold ${theme === 'bg-skin-black' ? ' text-gray-400' : 'text-gray-700'}  font-poppins`}>Transaction Type</label>
+                                    {/* Delivery Option */}
+                                    <div className="mt-2">
+                                        <label
+                                            className={`block text-xs font-bold ${
+                                                theme === "bg-skin-black"
+                                                    ? " text-gray-400"
+                                                    : "text-gray-700"
+                                            }  font-poppins`}
+                                        >
+                                            Delivery Option
+                                        </label>
                                         <div className="relative rounded-lg mt-1 flex space-x-1 overflow-hidden border-2 bg-gray-300">
                                             <div
                                                 className={`absolute ${theme} rounded-md h-full w-1/2 transition-all duration-300 ${
-                                                data.transaction_type === "logistics" ? "left-0" : "left-1/2"}`}
-                                            >
-                                            </div>
+                                                    data.transaction_type ===
+                                                    "logistics"
+                                                        ? "left-0"
+                                                        : "left-1/2"
+                                                }`}
+                                            ></div>
                                             <button
                                                 type="button"
                                                 className={` flex-1 flex items-center justify-center py-1 z-10 outline-none text-sm font-medium
-                                                ${data.transaction_type === "logistics" ? "text-white" : "text-black/50"}`}
-                                                onClick={() => setData({
-                                                    ...data,
-                                                    transaction_type : "logistics",
-                                                    carrier_name: "",
-                                                })}
+                                                ${
+                                                    data.transaction_type ===
+                                                    "logistics"
+                                                        ? "text-white"
+                                                        : "text-black/50"
+                                                }`}
+                                                onClick={() =>
+                                                    setData({
+                                                        ...data,
+                                                        transaction_type:
+                                                            "logistics",
+                                                        carrier_name: "",
+                                                        logistics_remarks: "",
+                                                        delivery_reference: "",
+                                                    })
+                                                }
                                             >
-                                                <Forklift className="w-5 h-5 mr-2"/> Logistics
+                                                <Forklift className="w-5 h-5 mr-2" />{" "}
+                                                Logistics
                                             </button>
                                             <button
                                                 type="button"
                                                 className={`flex-1 flex items-center justify-center py-1.5 z-10 outline-none text-sm font-medium
-                                                ${data.transaction_type == "hand carry" ? "text-white" : "text-black/50"}`}
-                                                onClick={() => setData({
-                                                    ...data,
-                                                    transaction_type: "hand carry",
-                                                    carrier_name: "",
-                                                })}
+                                                ${
+                                                    data.transaction_type ==
+                                                    "third party"
+                                                        ? "text-white"
+                                                        : "text-black/50"
+                                                }`}
+                                                onClick={() =>
+                                                    setData({
+                                                        ...data,
+                                                        transaction_type:
+                                                            "third party",
+                                                        carrier_name: "",
+                                                        logistics_remarks: "",
+                                                        delivery_reference: "",
+                                                    })
+                                                }
                                             >
-                                                <HandHelping className="w-5 h-5 mr-2"/> Hand Carry/Third Party
+                                                <HandHelping className="w-5 h-5 mr-2" />{" "}
+                                                Third Party
                                             </button>
                                         </div>
                                     </div>
 
-                                    {data.transaction_type == 'hand carry' && 
-                                        <InputComponent
-                                            placeholder="Enter Carrier Name"
-                                            name="carrier_name"
-                                            onChange={(e) =>setData("carrier_name",e.target.value)}
-                                            onError={errors.carrier_name}
+                                    {data.transaction_type == "logistics" && (
+                                        <TextArea
+                                            placeholder="Enter Remarks"
+                                            rows={4}
+                                            name="logistics_remarks"
+                                            displayName={"Remarks"}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "logistics_remarks",
+                                                    e.target.value
+                                                )
+                                            }
+                                            onError={errors.logistics_remarks}
                                         />
-                                    }
+                                    )}
+
+                                    {data.transaction_type == "third party" && (
+                                        <>
+                                            <InputComponent
+                                                placeholder="Enter Carrier Name"
+                                                name="carrier_name"
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "carrier_name",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                onError={errors.carrier_name}
+                                            />
+                                            <InputComponent
+                                                placeholder="Enter Delivery Ref#"
+                                                name="delivery_reference"
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "delivery_reference",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                onError={
+                                                    errors.delivery_reference
+                                                }
+                                            />
+                                        </>
+                                    )}
 
                                     {/* Action Buttons */}
                                     <div className="flex justify-between gap-4 pt-4 border-t border-gray-200">

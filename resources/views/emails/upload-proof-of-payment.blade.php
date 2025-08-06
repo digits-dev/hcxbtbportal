@@ -56,7 +56,7 @@
             <p>Thank you for your recent loan application with Home Credit. As part of your application, a downpayment is required.</p>
             <p>To proceed with your application, please upload your proof of payment using the link below:</p>
             <p style="text-align: center;">
-                <a href="{{ $order['payment_link']  }}" class="button">Upload Proof of Payment</a>
+                <a style="color:#ffffff" href="{{ $order['payment_link']  }}" class="button">Upload Proof of Payment</a>
             </p>
             <p>Please ensure the proof of payment clearly shows the transaction details and the amount paid. Once uploaded, our team will review it and continue processing your loan.</p>
             <p>If you have any questions, please do not hesitate to contact us.</p>

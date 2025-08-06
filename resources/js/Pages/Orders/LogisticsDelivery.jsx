@@ -135,64 +135,6 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                         </div>
                                     </div>
 
-                                    {/* Financial Information Section */}
-                                    <div className="bg-blue-50 p-4 rounded-lg">
-                                        <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                            Downpayment Details
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            {/* Downpayment Status */}
-                                            <div className="space-y-1">
-                                                <label className="block text-sm font-medium mb-2 text-gray-700">
-                                                    Downpayment
-                                                </label>
-                                                <span
-                                                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                                                        order.has_downpayment ==
-                                                        "yes"
-                                                            ? "bg-green-400 text-gray-700"
-                                                            : "bg-red-100 text-red-800"
-                                                    }`}
-                                                >
-                                                    {order.has_downpayment ==
-                                                    "yes" ? (
-                                                        <Check size={12} />
-                                                    ) : (
-                                                        <X size={12} />
-                                                    )}
-                                                    {order.has_downpayment ==
-                                                    "yes"
-                                                        ? "Yes"
-                                                        : "No"}
-                                                </span>
-                                            </div>
-
-                                            {/* Downpayment Value */}
-                                            {order.has_downpayment == "yes" && (
-                                                <div className="space-y-1">
-                                                    <label className="block text-sm font-medium text-gray-700">
-                                                        Downpayment Value
-                                                    </label>
-                                                    <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900 font-medium">
-                                                        {
-                                                            order.downpayment_value
-                                                        }
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Financed Amount */}
-                                            <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-gray-700">
-                                                    Financed Amount
-                                                </label>
-                                                <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900 font-medium">
-                                                    {order.financed_amount}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
                                     {/* Item Information Section */}
                                     <div className="bg-purple-50 p-4 rounded-lg mb-4">
                                         <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -256,69 +198,6 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                         </div>
                                     </div>
 
-                                    {/* Contract Information Section */}
-                                    {order.approved_contract && (
-                                        <div className="bg-green-50 p-4 rounded-lg">
-                                            <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                                Contract Information
-                                            </h3>
-                                            <div className="bg-white border border-gray-200 rounded-lg p-4">
-                                                <div className="mb-4">
-                                                    {order.approved_contract.endsWith(
-                                                        ".pdf"
-                                                    ) ? (
-                                                        <iframe
-                                                            src={`/contract/uploaded-contract/${order.approved_contract}`}
-                                                            className="w-full h-96 border rounded"
-                                                            title="PDF Viewer"
-                                                        ></iframe>
-                                                    ) : (
-                                                        <img
-                                                            src={`/contract/uploaded-contract/${order.approved_contract}`}
-                                                            alt="Proof of Payment"
-                                                            className="max-w-full h-auto rounded"
-                                                        />
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <svg
-                                                        className="h-8 w-8 text-green-600"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                        />
-                                                    </svg>
-                                                    <div className="flex-1">
-                                                        <div className="font-medium text-gray-900">
-                                                            {order.approved_contract.substring(
-                                                                order.approved_contract.lastIndexOf(
-                                                                    "_"
-                                                                ) + 1
-                                                            )}
-                                                        </div>
-                                                        <div className="text-sm text-gray-500">
-                                                            Approved contract
-                                                            document
-                                                        </div>
-                                                    </div>
-                                                    <a
-                                                        href={`/contract/uploaded-contract/${order.approved_contract}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
-                                                    >
-                                                        View
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
                                     {order.schedule_date && (
                                         <div className="bg-gray-300 p-4 rounded-lg">
                                             <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -344,18 +223,18 @@ const LogisticsDelivery = ({ page_title, order, lines }) => {
                                                 {/* Email Address */}
                                                 <div className="space-y-1">
                                                     <label className="block text-sm font-medium text-gray-700">
-                                                        Transaction Type
+                                                        Delivery Option
                                                     </label>
                                                     <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
                                                         {order.transaction_type ==
-                                                        "hand carry"
-                                                            ? "Hand Carry/Third Party"
+                                                        "third party"
+                                                            ? "Third Party"
                                                             : "Logistics"}
                                                     </div>
 
                                                     {order.carrier_name &&
                                                         order.transaction_type ==
-                                                            "hand carry" && (
+                                                            "third party" && (
                                                             <>
                                                                 <label className="block text-sm font-medium text-gray-700">
                                                                     Carrier Name
