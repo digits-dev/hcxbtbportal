@@ -68,7 +68,7 @@ class DashboardController extends Controller
         $order = Orders::query();
 
         if (CommonHelpers::myPrivilegeId() == AdmPrivileges::HOMECREDITSTAFF){
-            $order->where('created_by', CommonHelpers::myId());
+            $order = $order->where('created_by', CommonHelpers::myId());
         }
 
         // FOR CHART
