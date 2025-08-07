@@ -21,6 +21,7 @@ use Inertia\Response;
 use App\Mail\OrderConfirmationMail;
 use App\Mail\SendProofOfPaymentLink;
 use App\Mail\ReSendProofOfPaymentLink;
+use App\Models\ModeOfPayments;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Crypt;
@@ -259,6 +260,7 @@ class OrdersController extends Controller
         ->where('order_id', $id)->get();
  
         if(CommonHelpers::myPrivilegeId() == AdmPrivileges::ACCOUNTING) {
+            $data['mode_of_payments'] = ModeOfPayments::select('id as value', 'payment_name as label')->where('status', 'ACTIVE')->get(); 
             return Inertia::render("Orders/AccountingVerification", $data);
         }else if (CommonHelpers::myPrivilegeId() == AdmPrivileges::LOGISTICS){
                 if ($data['order']->status == Statuses::FOR_SCHEDULE) {
@@ -323,22 +325,34 @@ class OrdersController extends Controller
                 }  
 
             }else {
+                
+
 
                 $request->validate([
                     'dp_receipt'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
+                    'mode_of_payments_id' => 'required|integer',
+                    'other_mop' => 'required_if:mode_of_payments_id,8|max:30', // REQUIRED IF MOP IS OTHERS
+                ],
+                [
+                    'mode_of_payments_id.required' => 'Mode of Payment is required',
+                    'dp_receipt.required' => 'Please upload Downpayment Receipt',
+                    'other_mop.required_if' => 'Payment Name is required if the Mode of Payment is OTHER',
                 ]);
 
                 try{
+
                     $timestamp = now()->timestamp;
-                        if ($request->hasFile('dp_receipt')) {
-                            $file = $request->file('dp_receipt');
-                            $filename = $timestamp . '_' . $file->getClientOriginalName();
-                            $file->move(public_path('dp-receipt/uploaded-receipt'), $filename);
-                        }
+                    if ($request->hasFile('dp_receipt')) {
+                        $file = $request->file('dp_receipt');
+                        $filename = $timestamp . '_' . $file->getClientOriginalName();
+                        $file->move(public_path('dp-receipt/uploaded-receipt'), $filename);
+                    }
                 
                     Orders::where('id', $request->order_id)->update([
                         'status' => Statuses::ORDER_PROCESSING,
                         'dp_receipt' => $filename,
+                        'mode_of_payments_id' => $request->mode_of_payments_id,
+                        'other_mop' => $request->other_mop,
                         'verified_by_acctg' => CommonHelpers::myId(),
                         'verified_at_acctg' => now(),
                     ]);

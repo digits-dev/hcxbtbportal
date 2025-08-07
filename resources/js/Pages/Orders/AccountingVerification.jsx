@@ -6,16 +6,16 @@ import LoginInputTooltip from "../../Components/Tooltip/LoginInputTooltip";
 import { useTheme } from "../../Context/ThemeContext";
 import useThemeStyles from "../../Hooks/useThemeStyles";
 import { useToast } from "../../Context/ToastContext";
-import Modalv2 from "../../Components/Modal/Modalv2";
 import TextArea from "../../Components/Forms/TextArea";
 import Modal from "../../Components/Modal/Modal";
 import Button from "../../Components/Table/Buttons/Button";
+import CustomSelect from "../../Components/Dropdown/CustomSelect";
+import InputComponent from "../../Components/Forms/Input";
 
-const AccoutingVerification = ({ page_title, order, lines }) => {
+const AccoutingVerification = ({ page_title, order, lines, mode_of_payments }) => {
     const { handleToast } = useToast();
     const { theme } = useTheme();
-    const { primayActiveColor, textColorActive, buttonSwalColor } =
-        useThemeStyles(theme);
+    const { primayActiveColor, textColorActive, buttonSwalColor } = useThemeStyles(theme);
     const [uploadedFile, setUploadedFile] = useState(null);
     const [openModal, setOpenModal] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -23,6 +23,8 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
         dp_receipt: "",
         action: "",
         reason: "",
+        mode_of_payments_id: "",
+        other_mop: "",
     });
 
     const handleFileUpload = (e) => {
@@ -491,7 +493,7 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                                                         <div
                                                                             className="mt-2 text-sm text-gray-600 text-center truncate"
                                                                             title={
-                                                                                displayName
+                                                                                 displayName
                                                                             }
                                                                         >
                                                                             {
@@ -519,11 +521,34 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                                             );
                                         })()}
 
+                                    {/* Mode of Payment */}
+                                    <CustomSelect
+                                        displayName="Mode of Payment"
+                                        options={mode_of_payments}
+                                        placeholder="Select Mode of Payment"
+                                        onChange={(e)=>{setData({
+                                            ...data,
+                                            'mode_of_payments_id': e.value,
+                                            'other_mop': '',
+                                        });}}
+                                        onError={errors.mode_of_payments_id}
+                                    />
+
+                                    {data.mode_of_payments_id == 8 && 
+                                        <InputComponent
+                                            name="Payment Name"
+                                            value={data.other_mop}
+                                            onError={errors.other_mop}
+                                            placeholder="Enter other Payment Name"
+                                            onChange={(e)=>{setData('other_mop', e.target.value.toUpperCase())}}
+                                        />
+                                    }
+
                                     {/* Upload Downpayment Receipt */}
                                     <div className="space-y-2">
                                         <label
                                             htmlFor="dp_receipt"
-                                            className="block text-sm font-medium text-gray-700"
+                                            className="block text-xs font-bold text-gray-700"
                                         >
                                             Upload Downpayment Receipt
                                         </label>
@@ -658,6 +683,7 @@ const AccoutingVerification = ({ page_title, order, lines }) => {
                 <TextArea
                     rows={4}
                     name="reason"
+                    placeholder="Add reason here"
                     onChange={(e) => {
                         setData("reason", e.target.value);
                     }}

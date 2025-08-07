@@ -15,13 +15,15 @@ import { Line } from "react-chartjs-2"
 import Button from '../../Components/Table/Buttons/Button';
 import { useTheme } from '../../Context/ThemeContext';
 import { ArrowRight, Banknote, CalendarCheck, CheckCircle, CircleCheck, CircleX, Clock, Package, PackageSearch, ShoppingCart, Truck } from 'lucide-react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 const DashboardContent = ({chartValues, statusesValues}) => {
 
   const { theme } = useTheme();
+  const { auth } = usePage().props;
+  const { admin_privileges } = auth.sessions;
   // FOR CHART
   const [timeFrame, setTimeFrame] = useState("daily")
 
@@ -183,8 +185,11 @@ const DashboardContent = ({chartValues, statusesValues}) => {
   const getAverageOrders = () => {
     const data = getCurrentData()
     const total = getTotalOrders()
-    return Math.round(total / data.datasets[0].data.length)
+    const length = data.datasets[0].data.length
+
+    return length === 0 ? 0 : Math.round(total / length)
   }
+
 
   // FOR STATUSES
 
@@ -195,6 +200,7 @@ const DashboardContent = ({chartValues, statusesValues}) => {
       icon: ShoppingCart,
       color: "text-black",
       bgColor: "bg-black/10",
+      privilege: [1, 2, 3, 4, 5, 6, 7],
     },
     {
       title: "For Payment Orders",
@@ -202,6 +208,7 @@ const DashboardContent = ({chartValues, statusesValues}) => {
       icon: Banknote,
       color: "text-cyan-600",
       bgColor: "bg-cyan-50",
+      privilege: [1, 3],
     },
     {
       title: "For Verification Orders",
@@ -209,6 +216,7 @@ const DashboardContent = ({chartValues, statusesValues}) => {
       icon: CheckCircle,
       color: "text-orange-600",
       bgColor: "bg-orange-50",
+      privilege: [1, 3],
     },
     {
       title: "For Processing Orders",
@@ -216,6 +224,7 @@ const DashboardContent = ({chartValues, statusesValues}) => {
       icon: PackageSearch,
       color: "text-green-600",
       bgColor: "bg-green-50",
+      privilege: [1, 3],
     },
     {
       title: "Incomplete Orders",
@@ -223,6 +232,7 @@ const DashboardContent = ({chartValues, statusesValues}) => {
       icon: CircleX,
       color: "text-red-600",
       bgColor: "bg-red-50",
+      privilege: [1, 3],
     },
     {
       title: "For Schedule Orders",
@@ -230,6 +240,7 @@ const DashboardContent = ({chartValues, statusesValues}) => {
       icon: CalendarCheck,
       color: "text-blue-600",
       bgColor: "bg-blue-50",
+      privilege: [1, 7],
     },
     {
       title: "For Delivery Orders",
@@ -237,6 +248,7 @@ const DashboardContent = ({chartValues, statusesValues}) => {
       icon: Truck,
       color: "text-yellow-600",
       bgColor: "bg-yellow-50",
+      privilege: [1, 7],
     },
     {
       title: "To Close Orders",
@@ -244,6 +256,7 @@ const DashboardContent = ({chartValues, statusesValues}) => {
       icon: Clock,
       color: "text-purple-600",
       bgColor: "bg-purple-50",
+      privilege: [1, 6],
     },
     {
       title: "Closed Orders",
@@ -251,6 +264,7 @@ const DashboardContent = ({chartValues, statusesValues}) => {
       icon: CircleCheck,
       color: "text-green-600",
       bgColor: "bg-green-50",
+      privilege: [1, 6],
     },
   ]
 
@@ -263,7 +277,7 @@ const DashboardContent = ({chartValues, statusesValues}) => {
           <Link href='/orders' className='text-xs text-gray-500 flex items-center space-x-2'><ArrowRight className='w-2 h-2'/> <p>Go to Orders page</p></Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-            {stats.map((stat, index) => (
+            {stats.filter(stat => stat.privilege.includes(admin_privileges)).map((stat, index) => (
               <div
                 key={index}
                 className="relative overflow-hidden rounded-lg shadow-sm border border-gray-200 transition-shadow duration-200 hover:shadow-md p-4"

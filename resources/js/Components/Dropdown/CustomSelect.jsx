@@ -8,10 +8,10 @@ import LoginInputTooltip from "../Tooltip/LoginInputTooltip";
 const CustomSelect = ({isMulti = false, onError, maxMenuHeight = "100px", isStatus = false, menuPlacement, isDisabled,  options, onChange, value, name, defaultSelect, displayName, is_multi='', selectType = 'react-select', placeholder, extendClass, addMainClass, fontSize='12px' }) => {
     const {theme} = useTheme();
     const customStyles = {
-        control: (provided) => ({
+        control: (provided, state) => ({
             ...provided,
             backgroundColor: "#101215", // Dark background (Tailwind's bg-gray-800)
-            borderColor: onError ? '#dc3545' : "#9CA3AF)", // Border color (Tailwind's border-gray-600)
+             borderColor: state.isFocused ? 'black' : '#ccc',// Border color (Tailwind's border-gray-600)
             color: "#fff", // Text color
             boxShadow: "none",
             "&:hover": {
@@ -86,14 +86,19 @@ const CustomSelect = ({isMulti = false, onError, maxMenuHeight = "100px", isStat
             textOverflow: 'ellipsis',
             maxWidth: '100%', // optional, depending on parent width
         }),
-        control: (provided) => ({
+        control: (provided, state) => ({
             ...provided,
-            borderColor: onError ? '#dc3545' : "#9CA3AF)",
+            borderColor: state.isFocused ? 'black' : '#ccc', // input border
+            borderWidth: '2px',
+            boxShadow: 'none',
+            '&:hover': {
+                borderColor: 'black',
+                
+            },
       
         }),
         option: (provided, state) => ({
           ...provided,
-          color: isStatus ? state.data.status === "INACTIVE" ? "#EB4034" : "" : "", // Make text red for INACTIVE status
         }),
         singleValue: (provided) => ({
             ...provided,
