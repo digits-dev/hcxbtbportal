@@ -21,6 +21,7 @@ use Inertia\Response;
 use App\Mail\OrderConfirmationMail;
 use App\Mail\SendProofOfPaymentLink;
 use App\Mail\ReSendProofOfPaymentLink;
+use App\Mail\OrderScheduleMail;
 use App\Models\ModeOfPayments;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Mail;
@@ -108,7 +109,7 @@ class OrdersController extends Controller
             ],
             'financed_amount'    => 'required|decimal:0,2',
             'has_downpayment'    => 'required|in:yes,no',
-            'approved_contract'  => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'approved_contract'  => 'required|file|mimes:pdf',
 
         ],[
             'contact_details.required' => 'The contact number is required.',
@@ -192,13 +193,13 @@ class OrdersController extends Controller
                 ->toArray();
  
             if ($validatedData['has_downpayment'] === 'yes') {
-                Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
-                    'reference_number' => $order->reference_number,
-                    'customer_name' => $validatedData['first_name'] . " " .$validatedData['last_name'],
-                    'payment_link'  => url('/upload/' . $encryptedId),
-                ]));
+                // Mail::to($validatedData['email_address'])->send(new SendProofOfPaymentLink([
+                //     'reference_number' => $order->reference_number,
+                //     'customer_name' => $validatedData['first_name'] . " " .$validatedData['last_name'],
+                //     'payment_link'  => url('/upload/' . $encryptedId),
+                // ]));
             } else {
-                Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
+                // Mail::to($validatedData['email_address'])->send(new OrderConfirmationMail($orderData));
                 self::createDemTransaction($orderId);
             }
 
@@ -238,10 +239,13 @@ class OrdersController extends Controller
     public function view ($id) {
         $data = [];
         $data['page_title'] = ' Order Details';
+   
         $data['order'] = Orders::leftJoin('statuses', 'statuses.id', 'orders.status')
-            ->select('orders.*', 'statuses.name as status_name')
+            ->leftJoin('mode_of_payments', 'mode_of_payments.id', 'orders.mode_of_payments_id')
+            ->select('orders.*', 'statuses.name as status_name', 'mode_of_payments.payment_name' )
             ->where('orders.id', $id)
             ->first();
+            
         $data['lines'] = OrderLines::leftJoin('item_masters', 'item_masters.digits_code', 'order_lines.digits_code')
         ->where('order_id', $id)->get();
         $data['my_privilege_id'] = CommonHelpers::myPrivilegeId();
@@ -326,8 +330,6 @@ class OrdersController extends Controller
 
             }else {
                 
-
-
                 $request->validate([
                     'dp_receipt'  => 'required|file|mimes:jpg,jpeg,png|max:2048',
                     'mode_of_payments_id' => 'required|integer',
@@ -364,7 +366,7 @@ class OrdersController extends Controller
                                             ->get()
                                             ->toArray();
     
-                    Mail::to($order->email_address)->send(new OrderConfirmationMail($orderData));
+                    // Mail::to($order->email_address)->send(new OrderConfirmationMail($orderData));
     
                     self::createDemTransaction($order->id);
     
@@ -399,6 +401,17 @@ class OrdersController extends Controller
                     'scheduled_by_logistics' => CommonHelpers::myId(),
                     'scheduled_at_logistics' => now(),
                 ]);
+
+                Mail::to($order->email_address)->send(new OrderScheduleMail([
+                    'reference_number' => $order->reference_number,
+                    'customer_name' => $order->first_name." ".$order->last_name,
+                    'schedule_date' => $request->schedule_date,
+                    'transaction_type' => $request->transaction_type,
+                    'carrier_name' => $request->carrier_name,
+                    'delivery_reference' => $request->delivery_reference,
+                    'logistics_remarks' => $request->logistics_remarks,
+                ]));
+    
 
                 DB::commit();
                 return redirect('/orders')->with(['message' => 'Order Schedule Successful', 'type' => 'success']);
@@ -555,7 +568,8 @@ class OrdersController extends Controller
             'created_by'               => 1000, //DEM Creator
 		    'created_at'               => date('Y-m-d H:i:s'),
             'order_created'            => $headerDatas->created_at,
-            'payment_method'           => $headerDatas->payment_method ?? null
+            'payment_method'                => $headerDatas->mode_of_payments_id ?? ModeOfPayments::NA,
+            'payment_method_other'      => $headerDatas->other_mop ?? null,
         ]);
 
         foreach($orderLinesDatas ?? [] as $key => $val){

@@ -12,10 +12,16 @@ import Button from "../../Components/Table/Buttons/Button";
 import CustomSelect from "../../Components/Dropdown/CustomSelect";
 import InputComponent from "../../Components/Forms/Input";
 
-const AccoutingVerification = ({ page_title, order, lines, mode_of_payments }) => {
+const AccoutingVerification = ({
+    page_title,
+    order,
+    lines,
+    mode_of_payments,
+}) => {
     const { handleToast } = useToast();
     const { theme } = useTheme();
-    const { primayActiveColor, textColorActive, buttonSwalColor } = useThemeStyles(theme);
+    const { primayActiveColor, textColorActive, buttonSwalColor } =
+        useThemeStyles(theme);
     const [uploadedFile, setUploadedFile] = useState(null);
     const [openModal, setOpenModal] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -493,7 +499,7 @@ const AccoutingVerification = ({ page_title, order, lines, mode_of_payments }) =
                                                                         <div
                                                                             className="mt-2 text-sm text-gray-600 text-center truncate"
                                                                             title={
-                                                                                 displayName
+                                                                                displayName
                                                                             }
                                                                         >
                                                                             {
@@ -526,23 +532,30 @@ const AccoutingVerification = ({ page_title, order, lines, mode_of_payments }) =
                                         displayName="Mode of Payment"
                                         options={mode_of_payments}
                                         placeholder="Select Mode of Payment"
-                                        onChange={(e)=>{setData({
-                                            ...data,
-                                            'mode_of_payments_id': e.value,
-                                            'other_mop': '',
-                                        });}}
+                                        onChange={(e) => {
+                                            setData({
+                                                ...data,
+                                                mode_of_payments_id: e.value,
+                                                other_mop: "",
+                                            });
+                                        }}
                                         onError={errors.mode_of_payments_id}
                                     />
 
-                                    {data.mode_of_payments_id == 8 && 
+                                    {data.mode_of_payments_id == 9 && (
                                         <InputComponent
                                             name="Payment Name"
                                             value={data.other_mop}
                                             onError={errors.other_mop}
                                             placeholder="Enter other Payment Name"
-                                            onChange={(e)=>{setData('other_mop', e.target.value.toUpperCase())}}
+                                            onChange={(e) => {
+                                                setData(
+                                                    "other_mop",
+                                                    e.target.value.toUpperCase()
+                                                );
+                                            }}
                                         />
-                                    }
+                                    )}
 
                                     {/* Upload Downpayment Receipt */}
                                     <div className="space-y-2">

@@ -13,7 +13,8 @@ import useThemeStyles from "../../Hooks/useThemeStyles";
 const CreateOrderForm = ({ page_title, sku }) => {
     const { handleToast } = useToast();
     const { theme } = useTheme();
-    const { primayActiveColor, textColorActive, buttonSwalColor } = useThemeStyles(theme);
+    const { primayActiveColor, textColorActive, buttonSwalColor } =
+        useThemeStyles(theme);
     const [uploadedFile, setUploadedFile] = useState(null);
     const [modelFilter, setModelFilter] = useState("");
     const [colorFilter, setColorFilter] = useState("");
@@ -32,7 +33,6 @@ const CreateOrderForm = ({ page_title, sku }) => {
         approved_contract: "",
         items: [],
     });
-    
 
     const skuOptions = sku.map((item) => ({
         value: item.digits_code,
@@ -223,7 +223,6 @@ const CreateOrderForm = ({ page_title, sku }) => {
         setData("items", formattedItems);
     }, [selectedProducts]);
 
-
     const handleChange = (e) => {
         const name = e.name ? e.name : e.target.name;
         const value = e.value ? e.value : e.target.value;
@@ -275,7 +274,6 @@ const CreateOrderForm = ({ page_title, sku }) => {
                 });
             }
         });
-
     };
 
     return (
@@ -329,7 +327,7 @@ const CreateOrderForm = ({ page_title, sku }) => {
                                     onChange={handleChange}
                                     onError={errors.email_address}
                                 />
-                          
+
                                 {/* Contact Details */}
                                 <InputComponent
                                     placeholder="+639XXXXXXXXX"
@@ -341,27 +339,52 @@ const CreateOrderForm = ({ page_title, sku }) => {
                                 />
 
                                 {/* Downpayment - Yes/No */}
-                                <div className='mt-2'>
-                                    <label className={`block text-xs font-bold ${theme === 'bg-skin-black' ? ' text-gray-400' : 'text-gray-700'}  font-poppins`}>Downpayment</label>
+                                <div className="mt-2">
+                                    <label
+                                        className={`block text-xs font-bold ${
+                                            theme === "bg-skin-black"
+                                                ? " text-gray-400"
+                                                : "text-gray-700"
+                                        }  font-poppins`}
+                                    >
+                                        Downpayment
+                                    </label>
                                     <div className="relative rounded-lg mt-1 flex space-x-1 overflow-hidden border-2 bg-gray-300">
                                         <div
                                             className={`absolute ${theme} rounded-md h-full w-1/2 transition-all duration-300 ${
-                                            data.has_downpayment === "yes" ? "left-0" : "left-1/2"}`}
-                                        >
-                                        </div>
+                                                data.has_downpayment === "yes"
+                                                    ? "left-0"
+                                                    : "left-1/2"
+                                            }`}
+                                        ></div>
                                         <button
                                             type="button"
                                             className={` flex-1 py-1 z-10 outline-none text-sm font-medium
-                                            ${data.has_downpayment === "yes" ? "text-white" : "text-black/50"}`}
-                                            onClick={() => setData("has_downpayment", "yes")}
+                                            ${
+                                                data.has_downpayment === "yes"
+                                                    ? "text-white"
+                                                    : "text-black/50"
+                                            }`}
+                                            onClick={() =>
+                                                setData(
+                                                    "has_downpayment",
+                                                    "yes"
+                                                )
+                                            }
                                         >
                                             Yes
                                         </button>
                                         <button
                                             type="button"
                                             className={`flex-1 py-1.5 z-10 outline-none text-sm font-medium
-                                            ${data.has_downpayment == "no" ? "text-white" : "text-black/50"}`}
-                                            onClick={() => setData("has_downpayment", "no")}
+                                            ${
+                                                data.has_downpayment == "no"
+                                                    ? "text-white"
+                                                    : "text-black/50"
+                                            }`}
+                                            onClick={() =>
+                                                setData("has_downpayment", "no")
+                                            }
                                         >
                                             No
                                         </button>
@@ -411,8 +434,16 @@ const CreateOrderForm = ({ page_title, sku }) => {
                                             {/* Model Filter */}
                                             <CustomSelect
                                                 displayName="Model"
-                                                value={uniqueModels.find((option) =>option.value === modelFilter)}
-                                                onChange={(option) =>setModelFilter(option?.value || "")}
+                                                value={uniqueModels.find(
+                                                    (option) =>
+                                                        option.value ===
+                                                        modelFilter
+                                                )}
+                                                onChange={(option) =>
+                                                    setModelFilter(
+                                                        option?.value || ""
+                                                    )
+                                                }
                                                 options={uniqueModels}
                                                 placeholder="Select model..."
                                                 maxMenuHeight="300px"
@@ -421,8 +452,16 @@ const CreateOrderForm = ({ page_title, sku }) => {
                                             {/* Color Filter */}
                                             <CustomSelect
                                                 displayName="Color"
-                                                value={uniqueColors.find((option) =>option.value === colorFilter)}
-                                                onChange={(option) => setColorFilter(option?.value || "")}
+                                                value={uniqueColors.find(
+                                                    (option) =>
+                                                        option.value ===
+                                                        colorFilter
+                                                )}
+                                                onChange={(option) =>
+                                                    setColorFilter(
+                                                        option?.value || ""
+                                                    )
+                                                }
                                                 options={uniqueColors}
                                                 placeholder="Select color..."
                                                 maxMenuHeight="300px"
@@ -431,8 +470,16 @@ const CreateOrderForm = ({ page_title, sku }) => {
                                             {/* Size Filter */}
                                             <CustomSelect
                                                 displayName="Storage/Size"
-                                                value={uniqueSizes.find((option) => option.value === sizeFilter)}
-                                                onChange={(option) => setSizeFilter(option?.value || "")}
+                                                value={uniqueSizes.find(
+                                                    (option) =>
+                                                        option.value ===
+                                                        sizeFilter
+                                                )}
+                                                onChange={(option) =>
+                                                    setSizeFilter(
+                                                        option?.value || ""
+                                                    )
+                                                }
                                                 options={uniqueSizes}
                                                 placeholder="Select size..."
                                                 maxMenuHeight="300px"
@@ -589,12 +636,18 @@ const CreateOrderForm = ({ page_title, sku }) => {
                                         >
                                             Upload of Approved Contract
                                         </label>
-                                        <div className={`relative border-2 ${errors.approved_contract ? 'border-red-500' : 'border-dashed border-gray-400 hover:border-gray-400'}  rounded-lg p-6 text-center  transition-colors cursor-pointer`}>
+                                        <div
+                                            className={`relative border-2 ${
+                                                errors.approved_contract
+                                                    ? "border-red-500"
+                                                    : "border-dashed border-gray-400 hover:border-gray-400"
+                                            }  rounded-lg p-6 text-center  transition-colors cursor-pointer`}
+                                        >
                                             <input
                                                 id="approved_contract"
                                                 name="approved_contract"
                                                 type="file"
-                                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                                accept=".pdf"
                                                 onChange={handleFileUpload}
                                                 className="hidden"
                                             />
@@ -644,19 +697,20 @@ const CreateOrderForm = ({ page_title, sku }) => {
                                                             contract
                                                         </span>
                                                         <span className="text-xs text-gray-500">
-                                                            PDF, DOC, DOCX, JPG,
-                                                            PNG up to 10MB
+                                                            PDF up to 10MB
                                                         </span>
                                                     </>
                                                 )}
                                             </label>
-                                             {errors.approved_contract && 
-                                                <LoginInputTooltip content={errors.approved_contract}>
-                                                <i
-                                                    className="fa-solid fa-circle-info text-red-600 absolute cursor-pointer top-1/2 text-xs md:text-base right-1.5 md:right-3 transform -translate-y-1/2">
-                                                </i>
+                                            {errors.approved_contract && (
+                                                <LoginInputTooltip
+                                                    content={
+                                                        errors.approved_contract
+                                                    }
+                                                >
+                                                    <i className="fa-solid fa-circle-info text-red-600 absolute cursor-pointer top-1/2 text-xs md:text-base right-1.5 md:right-3 transform -translate-y-1/2"></i>
                                                 </LoginInputTooltip>
-                                            }
+                                            )}
                                         </div>
                                     </div>
                                 </div>

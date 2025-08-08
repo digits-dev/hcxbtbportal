@@ -133,6 +133,27 @@ const ViewOrderDetails = ({ page_title, order, lines, my_privilege_id }) => {
                                                 {order.financed_amount}
                                             </div>
                                         </div>
+                                        {/* Mode of Payment */}
+                                        {order.payment_name && (
+                                            <div className="space-y-1">
+                                                <label className="block text-sm font-medium text-gray-700">
+                                                    Mode of Payment
+                                                </label>
+                                                <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
+                                                    {order.payment_name}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {order.other_mop && (
+                                            <div className="space-y-1">
+                                                <label className="block text-sm font-medium text-gray-700">
+                                                    Other Mode of Payment
+                                                </label>
+                                                <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900 whitespace-pre-line">
+                                                    {order.other_mop}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 {/* Item Information Section */}
@@ -200,70 +221,71 @@ const ViewOrderDetails = ({ page_title, order, lines, my_privilege_id }) => {
                                     </div>
                                 </div>
                                 {/* Contract Information Section */}
-                                {order.approved_contract && (
-                                    <div className="bg-green-50 p-4 rounded-lg">
-                                        <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                            Contract Information
-                                        </h3>
-                                        <div className="bg-white border border-gray-200 rounded-lg p-4">
-                                            <div className="mb-4">
-                                                {order.approved_contract.endsWith(
-                                                    ".pdf"
-                                                ) ? (
-                                                    <iframe
-                                                        src={`/contract/uploaded-contract/${order.approved_contract}`}
-                                                        className="w-full h-96 border rounded"
-                                                        title="PDF Viewer"
-                                                    ></iframe>
-                                                ) : (
-                                                    <img
-                                                        src={`/contract/uploaded-contract/${order.approved_contract}`}
-                                                        alt="Proof of Payment"
-                                                        className="max-w-full h-auto rounded"
-                                                    />
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <svg
-                                                    className="h-8 w-8 text-green-600"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                    />
-                                                </svg>
-                                                <div className="flex-1">
-                                                    <div className="font-medium text-gray-900">
-                                                        {order.approved_contract.substring(
-                                                            order.approved_contract.lastIndexOf(
-                                                                "_"
-                                                            ) + 1
-                                                        )}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500">
-                                                        Approved contract
-                                                        document
-                                                    </div>
+                                {[2, 3, 6].includes(my_privilege_id) &&
+                                    order.approved_contract && (
+                                        <div className="bg-green-50 p-4 rounded-lg">
+                                            <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                                Contract Information
+                                            </h3>
+                                            <div className="bg-white border border-gray-200 rounded-lg p-4">
+                                                <div className="mb-4">
+                                                    {order.approved_contract.endsWith(
+                                                        ".pdf"
+                                                    ) ? (
+                                                        <iframe
+                                                            src={`/contract/uploaded-contract/${order.approved_contract}`}
+                                                            className="w-full h-96 border rounded"
+                                                            title="PDF Viewer"
+                                                        ></iframe>
+                                                    ) : (
+                                                        <img
+                                                            src={`/contract/uploaded-contract/${order.approved_contract}`}
+                                                            alt="Proof of Payment"
+                                                            className="max-w-full h-auto rounded"
+                                                        />
+                                                    )}
                                                 </div>
-                                                <a
-                                                    href={`/contract/uploaded-contract/${order.approved_contract}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
-                                                >
-                                                    View
-                                                </a>
+                                                <div className="flex items-center gap-3">
+                                                    <svg
+                                                        className="h-8 w-8 text-green-600"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                        />
+                                                    </svg>
+                                                    <div className="flex-1">
+                                                        <div className="font-medium text-gray-900">
+                                                            {order.approved_contract.substring(
+                                                                order.approved_contract.lastIndexOf(
+                                                                    "_"
+                                                                ) + 1
+                                                            )}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500">
+                                                            Approved contract
+                                                            document
+                                                        </div>
+                                                    </div>
+                                                    <a
+                                                        href={`/contract/uploaded-contract/${order.approved_contract}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                                                    >
+                                                        View
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )}
-                                {order.rejected_payment_proof &&
-                                    my_privilege_id == 3 &&
+                                    )}
+                                {[2, 3, 6].includes(my_privilege_id) &&
+                                    order.rejected_payment_proof &&
                                     (() => {
                                         const images =
                                             order.rejected_payment_proof
@@ -346,8 +368,8 @@ const ViewOrderDetails = ({ page_title, order, lines, my_privilege_id }) => {
                                             </div>
                                         );
                                     })()}
-                                {order.payment_proof &&
-                                    my_privilege_id == 3 &&
+                                {[2, 3, 6].includes(my_privilege_id) &&
+                                    order.payment_proof &&
                                     (() => {
                                         const images = order.payment_proof
                                             .split(",")
@@ -429,8 +451,8 @@ const ViewOrderDetails = ({ page_title, order, lines, my_privilege_id }) => {
                                             </div>
                                         );
                                     })()}
-                                {order.dp_receipt &&
-                                    my_privilege_id == 3 &&
+                                {[2, 3, 6].includes(my_privilege_id) &&
+                                    order.dp_receipt &&
                                     (() => {
                                         const images = order.dp_receipt
                                             .split(",")
@@ -513,83 +535,86 @@ const ViewOrderDetails = ({ page_title, order, lines, my_privilege_id }) => {
                                         );
                                     })()}
                                 {/* Schedule Information */}
-                                {order.schedule_date && (
-                                    <div className="bg-gray-300 p-4 rounded-lg">
-                                        <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                            Schedule Information
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-gray-700">
-                                                    Delivery Option
-                                                </label>
-                                                <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
-                                                    {order.transaction_type ==
-                                                    "third party"
-                                                        ? "Third Party"
-                                                        : "Logistics"}
+
+                                {[2, 6, 7].includes(my_privilege_id) &&
+                                    order.schedule_date && (
+                                        <div className="bg-gray-300 p-4 rounded-lg">
+                                            <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                                Schedule Information
+                                            </h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-1">
+                                                    <label className="block text-sm font-medium text-gray-700">
+                                                        Delivery Option
+                                                    </label>
+                                                    <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
+                                                        {order.transaction_type ==
+                                                        "third party"
+                                                            ? "Third Party"
+                                                            : "Logistics"}
+                                                    </div>
+
+                                                    {order.logistics_remarks &&
+                                                        order.transaction_type ==
+                                                            "logistics" && (
+                                                            <>
+                                                                <label className="block text-sm font-medium text-gray-700">
+                                                                    Remarks
+                                                                </label>
+
+                                                                <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900 whitespace-pre-line">
+                                                                    {
+                                                                        order.logistics_remarks
+                                                                    }
+                                                                </div>
+                                                            </>
+                                                        )}
+
+                                                    {order.carrier_name &&
+                                                        order.transaction_type ==
+                                                            "third party" && (
+                                                            <>
+                                                                <label className="block text-sm font-medium text-gray-700">
+                                                                    Carrier Name
+                                                                </label>
+                                                                <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
+                                                                    {
+                                                                        order.carrier_name
+                                                                    }
+                                                                </div>
+                                                                <label className="block text-sm font-medium text-gray-700">
+                                                                    Delivery
+                                                                    Reference
+                                                                </label>
+                                                                <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
+                                                                    {
+                                                                        order.delivery_reference
+                                                                    }
+                                                                </div>
+                                                            </>
+                                                        )}
                                                 </div>
-
-                                                {order.logistics_remarks &&
-                                                    order.transaction_type ==
-                                                        "logistics" && (
-                                                        <>
-                                                            <label className="block text-sm font-medium text-gray-700">
-                                                                Remarks
-                                                            </label>
-
-                                                            <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900 whitespace-pre-line">
-                                                                {
-                                                                    order.logistics_remarks
-                                                                }
-                                                            </div>
-                                                        </>
-                                                    )}
-
-                                                {order.carrier_name &&
-                                                    order.transaction_type ==
-                                                        "third party" && (
-                                                        <>
-                                                            <label className="block text-sm font-medium text-gray-700">
-                                                                Carrier Name
-                                                            </label>
-                                                            <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
-                                                                {
-                                                                    order.carrier_name
-                                                                }
-                                                            </div>
-                                                            <label className="block text-sm font-medium text-gray-700">
-                                                                Delivery
-                                                                Reference
-                                                            </label>
-                                                            <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
-                                                                {
-                                                                    order.delivery_reference
-                                                                }
-                                                            </div>
-                                                        </>
-                                                    )}
-                                            </div>
-                                            <div className="space-y-1">
-                                                <label className="block text-sm font-medium text-gray-700">
-                                                    Schedule Date
-                                                </label>
-                                                <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
-                                                    {
-                                                        new Date(
-                                                            order.schedule_date
-                                                        )
-                                                            .toISOString()
-                                                            .split("T")[0]
-                                                    }
+                                                <div className="space-y-1">
+                                                    <label className="block text-sm font-medium text-gray-700">
+                                                        Schedule Date
+                                                    </label>
+                                                    <div className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-900">
+                                                        {
+                                                            new Date(
+                                                                order.schedule_date
+                                                            )
+                                                                .toISOString()
+                                                                .split("T")[0]
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
                                 {/* Proof of Delivery */}
-                                {order.proof_of_delivery &&
+                                {[2, 6, 7].includes(my_privilege_id) &&
+                                    order.proof_of_delivery &&
                                     (() => {
                                         const images = order.proof_of_delivery
                                             .split(",")

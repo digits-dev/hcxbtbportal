@@ -15,8 +15,8 @@ class ModeOfPayments extends Model
     Public const BANK_DEPOSIT = 4;
     Public const LOYALTY_POINTS = 5;
     Public const CREDIT_DEBIT_CARD = 6;
-    Public const NA = 7;
-    Public const OTHER = 8;
+    Public const NA = 8;
+    Public const OTHER = 9;
 
     protected $fillable = [
         'id',

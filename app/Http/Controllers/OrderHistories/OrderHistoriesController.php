@@ -62,10 +62,13 @@ class OrderHistoriesController extends Controller
     public function view ($id) {
         $data = [];
         $data['page_title'] = ' Order Details';
+
         $data['order'] = Orders::leftJoin('statuses', 'statuses.id', 'orders.status')
-            ->select('orders.*', 'statuses.name as status_name')
+            ->leftJoin('mode_of_payments', 'mode_of_payments.id', 'orders.mode_of_payments_id')
+            ->select('orders.*', 'statuses.name as status_name', 'mode_of_payments.payment_name' )
             ->where('orders.id', $id)
             ->first();
+
         $data['lines'] = OrderLines::leftJoin('item_masters', 'item_masters.digits_code', 'order_lines.digits_code')
         ->where('order_id', $id)->get();
         $data['my_privilege_id'] = CommonHelpers::myPrivilegeId();

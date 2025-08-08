@@ -380,6 +380,95 @@ const EcommClose = ({ page_title, order, lines }) => {
                                             </div>
                                         </div>
                                     )}
+                                    {/* Proof of Delivery */}
+                                    {order.proof_of_delivery &&
+                                        (() => {
+                                            const images =
+                                                order.proof_of_delivery
+                                                    .split(",")
+                                                    .map((f) => f.trim());
+                                            const isSingleImage =
+                                                images.length === 1;
+
+                                            return (
+                                                <div className="bg-green-50 p-4 rounded-lg">
+                                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                                        Proof of Delivery
+                                                    </h3>
+                                                    <div
+                                                        className={
+                                                            isSingleImage
+                                                                ? ""
+                                                                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+                                                        }
+                                                    >
+                                                        {images.map(
+                                                            (
+                                                                filename,
+                                                                index
+                                                            ) => {
+                                                                const displayName =
+                                                                    filename.substring(
+                                                                        filename.lastIndexOf(
+                                                                            "_"
+                                                                        ) + 1
+                                                                    );
+                                                                const fileUrl = `/delivery/proof_of_delivery/${filename}`;
+                                                                return (
+                                                                    <div
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                        className={`bg-white border border-gray-200 rounded-lg p-4 ${
+                                                                            isSingleImage
+                                                                                ? "max-w-3xl mx-auto"
+                                                                                : ""
+                                                                        }`}
+                                                                    >
+                                                                        <img
+                                                                            src={
+                                                                                fileUrl
+                                                                            }
+                                                                            alt={`Proof of Delivery ${
+                                                                                index +
+                                                                                1
+                                                                            }`}
+                                                                            className={`rounded shadow-sm ${
+                                                                                isSingleImage
+                                                                                    ? "w-full h-auto"
+                                                                                    : "w-full h-48 object-contain"
+                                                                            }`}
+                                                                        />
+                                                                        <div
+                                                                            className="mt-2 text-sm text-gray-600 text-center truncate"
+                                                                            title={
+                                                                                displayName
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                displayName
+                                                                            }
+                                                                        </div>
+                                                                        <div className="mt-2 text-center">
+                                                                            <a
+                                                                                href={
+                                                                                    fileUrl
+                                                                                }
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="inline-block px-3 py-1 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                                                                            >
+                                                                                View
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
                                     {/* Action Buttons */}
                                     <div className="flex justify-between gap-4 pt-4 border-t border-gray-200">
                                         <button
